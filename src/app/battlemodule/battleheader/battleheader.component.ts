@@ -8,6 +8,7 @@ import { EntitiesService } from 'app/game.services/entityservice';
 })
 export class BattleheaderComponent implements OnInit {
 
+  @Input() buttonDisabled= false;
   @Output() startRound = new EventEmitter<{action: string, spell: string}>();
   spellList: string[];
   spellTocast: string;

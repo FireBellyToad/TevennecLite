@@ -45,8 +45,8 @@ export abstract class GameEntity {
     readonly spellsKnown = new Map<string, Castable>();
     spells: Castable[];
 
-    constructor( name: string, tou: number, agi: number, min: number, wil: number, level: number,
-                 role: Role, talent: Talent, spells: Castable[]) {
+    constructor(name: string, tou: number, agi: number, min: number, wil: number, level: number,
+        role: Role, talent: Talent, spells: Castable[]) {
 
         this.tou = tou;
         this.agi = agi;
@@ -56,15 +56,15 @@ export abstract class GameEntity {
         this.level = level;
         this.name = name;
 
-        this.energySlots = Math.max( 0, Math.min( 6 , this.min ) );
+        this.energySlots = Math.max(0, Math.min(6, this.min));
         this.availableSlots = this.energySlots;
 
         this.role = role;
         this.talent = talent;
         this.currentInitiative = new StandardDiceRoll(1, 20, this.agi);
 
-        for ( const spell of spells ){
-            this.spellsKnown.set( spell.name, spell );
+        for (const spell of spells) {
+            this.spellsKnown.set(spell.name, spell);
         }
 
         this.addHpIncrements();
@@ -83,24 +83,24 @@ export abstract class GameEntity {
 
     // Defense
 
-   public abstract getDEF(): number;
+    public abstract getDEF(): number;
 
     // Saving throws
 
     getTouSavingThrow(): DiceRoll {
-        return this.getSavingThrow( this.tou );
+        return this.getSavingThrow(this.tou);
     }
     getAgiSavingThrow(): DiceRoll {
-        return this.getSavingThrow( this.agi );
+        return this.getSavingThrow(this.agi);
     }
     getMinSavingThrow(): DiceRoll {
-        return this.getSavingThrow( this.min );
+        return this.getSavingThrow(this.min);
     }
     getWilSavingThrow(): DiceRoll {
-        return this.getSavingThrow( this.wil );
+        return this.getSavingThrow(this.wil);
     }
 
-    protected abstract getSavingThrow( attribute: number );
+    protected abstract getSavingThrow(attribute: number);
 
     // Initiative
 
@@ -115,15 +115,15 @@ export abstract class GameEntity {
     // Resistance, Immunities and Vulnerabilities
 
     hasVulnerability(damageType: DamageType): boolean {
-        return this.vulnerabilities.includes( damageType );
+        return this.vulnerabilities.includes(damageType);
     }
 
     hasResistance(damageType: DamageType): boolean {
-        return this.resistances.includes( damageType );
+        return this.resistances.includes(damageType);
     }
 
     hasImmunity(damageType: DamageType): boolean {
-        return this.immunities.includes( damageType );
+        return this.immunities.includes(damageType);
     }
 
     // HP
@@ -132,7 +132,7 @@ export abstract class GameEntity {
 
         this.maxHp = 8 + this.tou * 2;
 
-        for ( const increment of this.levelupHpIncrements ) {
+        for (const increment of this.levelupHpIncrements) {
 
             this.maxHp += increment;
         }
@@ -140,19 +140,36 @@ export abstract class GameEntity {
         this.actualHP = this.maxHp;
     }
 
-    takeDamage( roll: DamageRoll ): number {
+    takeDamageFromRoll(roll: DamageRoll): number {
 
         let totalDamage = roll.damageRoll.totalResult
 
-        if ( this.hasImmunity( roll.damageType ) ) {
+        if (this.hasImmunity(roll.damageType)) {
             return 0;
-        } else if ( this.hasResistance( roll.damageType ) ) {
-            totalDamage = Math.max ( 0, totalDamage - 5 );
-        } else if ( this.hasVulnerability( roll.damageType ) ) {
+        } else if (this.hasResistance(roll.damageType)) {
+            totalDamage = Math.max(0, totalDamage - 5);
+        } else if (this.hasVulnerability(roll.damageType)) {
             totalDamage += 5;
         }
 
-        this.actualHP = Math.max ( 0 ,  this.actualHP - totalDamage );
+        this.actualHP = Math.max(0, this.actualHP - totalDamage);
+
+        return totalDamage;
+    }
+
+    takeDamageFromValue(damage: number, damageType: DamageType) {
+
+        let totalDamage = damage
+
+        if (this.hasImmunity(damageType)) {
+            return 0;
+        } else if (this.hasResistance(damageType)) {
+            totalDamage = Math.max(0, totalDamage - 5);
+        } else if (this.hasVulnerability(damageType)) {
+            totalDamage += 5;
+        }
+
+        this.actualHP = Math.max(0, this.actualHP - totalDamage);
 
         return totalDamage;
     }
@@ -166,17 +183,17 @@ export abstract class GameEntity {
     abstract canBeBlocked(): boolean;
 
     // Concentration
-    attemptConcentration( difficulty: number ): boolean {
+    attemptConcentration(difficulty: number): boolean {
 
-        return new StandardDiceRoll( 1, 20, this.tou ).totalResult >= difficulty;
+        return new StandardDiceRoll(1, 20, this.tou).totalResult >= difficulty;
 
     }
 
     // Energy Slots, return false if can't cast
-    spendEnergySlots( toSpend: number): boolean {
+    spendEnergySlots(toSpend: number): boolean {
 
 
-        if ( this.energySlots < toSpend || this.availableSlots < toSpend ) {
+        if (this.energySlots < toSpend || this.availableSlots < toSpend) {
             return false;
         }
 
@@ -186,9 +203,9 @@ export abstract class GameEntity {
     }
 
     // Reserve slots for Aura spells. Returns false if can't cast
-    reserveEnergySlots( toReserve: number): boolean {
+    reserveEnergySlots(toReserve: number): boolean {
 
-        if ( this.energySlots < toReserve || this.availableSlots < toReserve ) {
+        if (this.energySlots < toReserve || this.availableSlots < toReserve) {
             return false;
         }
 
@@ -201,8 +218,8 @@ export abstract class GameEntity {
 
     // Regain Will/2 slots per round
     regainEnergySlot() {
-        const toRegain = Math.max(1 , Math.floor( this.wil / 2 ));
-        this.availableSlots = Math.min(  this.energySlots - this.occupiedSlots, this.availableSlots + toRegain);
+        const toRegain = Math.max(1, Math.floor(this.wil / 2));
+        this.availableSlots = Math.min(this.energySlots - this.occupiedSlots, this.availableSlots + toRegain);
     }
 
 }

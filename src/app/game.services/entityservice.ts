@@ -21,20 +21,24 @@ export class EntitiesService {
         this.spellService = spellService;
 
         this.char = [
-            new Character('Regrell', 4, 2, 3, 0, 10, Role.Fighter, Talent.Exemplar,
+            new Character('Regrell', 2, 1, 2, 0, 2, Role.Fighter, Talent.Exemplar,
             null, null, null, this.spellService.getSpells()),
             new Character( 'Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
-                            ItemFactory.MACE, null, ItemFactory.SHIELD, this.spellService.getSpells())
+                            ItemFactory.MACE, null, ItemFactory.SHIELD, [this.spellService.getSpellByName('Sagitta')])
         ];
         this.mons = [
+            new Monster( 'Lesser Daemon', 0, 1, 2, 1, 2,
+                         Role.Sorcerer, Talent.Generic, MonsterType.LesserFoul,
+                         new Weapon( 'Smash', 1, 3, [WeaponType.OneHanded, WeaponType.Bludgeoning]),
+                         [this.spellService.getSpellByName('Cause Wounds')]),
             new Monster( 'Ogre', 5, 2, 0, 0, 4,
-                         Role.Brute, Talent.Big, MonsterType.MinorFoul,
+                         Role.Brute, Talent.Big, MonsterType.LesserFoul,
                          new Weapon( 'Smash', 1, 6, [WeaponType.OneHanded, WeaponType.Bludgeoning])),
             new Monster( 'Rabid Dog', 0, -2, -2, -2, 1,
                           Role.Brute, Talent.Generic, MonsterType.Native,
                           new Weapon( 'Bite', 1, 2, [WeaponType.OneHanded, WeaponType.Piercing])),
             new Monster( 'Necrospecter', 3, 2, 2, 1, 4,
-                         Role.Brute, Talent.Quick, MonsterType.MinorUndead,
+                         Role.Brute, Talent.Quick, MonsterType.LesserUndead,
                          new Weapon( 'Claw', 1, 4, [WeaponType.OneHanded, WeaponType.Slashing])),
             new Monster( 'Death Giant', 8, 2, 2, 1, 9,
                          Role.Brute, Talent.Big, MonsterType.MajorUndead,

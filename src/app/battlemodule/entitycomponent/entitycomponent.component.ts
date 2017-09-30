@@ -38,11 +38,11 @@ export class EntitycomponentComponent implements OnInit {
           nameToShow = 'Native';
           break;
         }
-        case MonsterType.MinorFoul: {
+        case MonsterType.LesserFoul: {
           nameToShow = 'Minor Foul';
           break;
         }
-        case MonsterType.MinorUndead: {
+        case MonsterType.LesserUndead: {
           nameToShow = 'Minor Undead';
           break;
         }

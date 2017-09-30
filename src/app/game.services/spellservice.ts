@@ -24,7 +24,7 @@ export class SpellService {
 
                 log.addEntry(caster.name + ' casts ' + this.name);
                 const dmg = new DamageRoll(1, 6, caster.wil * 2, DamageType.Light);
-                const finalDamage = targets[0].takeDamage(dmg);
+                const finalDamage = targets[0].takeDamageFromRoll(dmg);
 
                 let resImmVulMessage = '';
                 if (targets[0].hasVulnerability(dmg.damageType)) {
@@ -55,7 +55,7 @@ export class SpellService {
                         savingThrow.difficultyClass.toString(),
                         savingThrow.hasSuccess());
 
-                    const finalDamage = target.takeDamage(dmg);
+                    const finalDamage = target.takeDamageFromRoll(dmg);
 
                     let resImmVulMessage = '';
                     if (target.hasVulnerability(dmg.damageType)) {
@@ -69,11 +69,38 @@ export class SpellService {
                         resImmVulMessage);
                 }
             }
+        }, {
+            name: 'Cause Wounds',
+            spellLevel: 4,
+            slotExpendend: 2,
+            isAura: false,
+            cast: function (targets: GameEntity[], caster: GameEntity) {
+
+                // The target takes 1d3+(Wil) damage, TOU save halves
+                log.addEntry(caster.name + ' casts ' + this.name);
+                const dmg = new DamageRoll(1, 3, caster.wil, DamageType.Darkness);
+                const finalDamage = targets[0].takeDamageFromRoll(dmg);
+
+                let resImmVulMessage = '';
+                if (targets[0].hasVulnerability(dmg.damageType)) {
+                    resImmVulMessage = '*VULNERABLE*'
+                } else if (targets[0].hasResistance(dmg.damageType)) {
+                    resImmVulMessage = '*RESISTANT*'
+                }
+                log.addDamageEntry(targets[0].name,
+                    caster.name,
+                    dmg.toString(),
+                    finalDamage.toString(),
+                    resImmVulMessage);
+            }
         }];
     }
 
     getSpells(): Castable[] {
         return this.spells;
+    }
+    getSpellByName(name: string): Castable {
+        return this.spells.find( sp => sp.name === name);
     }
 }
 

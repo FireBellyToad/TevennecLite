@@ -14,6 +14,7 @@ import { Talent } from 'app/game.enums/talents';
 export class BattleService {
 
     battleTimer;
+    roundFinished = true;
     logger: Logger;
 
     // Second parameter is a countdown for the regain to happen
@@ -26,7 +27,7 @@ export class BattleService {
 
     // Starts round
     startRound(roundNumber, entitiesInBattle: GameEntity[], playerTurnAction: { action: string, spell: string, target: GameEntity }) {
-
+        this.roundFinished = false;
         // Cleans log
         this.logger.addEntry('Round ' + roundNumber + ' Start', LogEntry.COLOR_GREEN);
 
@@ -68,7 +69,11 @@ export class BattleService {
         for (const entity of entitiesInBattle) {
 
             if (entity instanceof Monster) {
-                turnActions.set(entity, { action: 'atk', spell: '', target: monsterTargets[0] });
+                if (entity.availableSlots >= entity.spellsKnown.get('Cause Wounds').slotExpendend ) {
+                    turnActions.set(entity, { action: 'cas', spell: 'Cause Wounds', target: monsterTargets[0] });
+                } else {
+                    turnActions.set(entity, { action: 'atk', spell: '', target: monsterTargets[0] });
+                }
             } else {
                 turnActions.set(entity, playerTurnAction);
             }
@@ -172,7 +177,7 @@ export class BattleService {
 
             } else {
 
-                finalDamage = hitTuple.target.takeDamage(hitTuple.damage);
+                finalDamage = hitTuple.target.takeDamageFromRoll(hitTuple.damage);
 
                 if (hitTuple.target.hasImmunity(hitTuple.damage.damageType)) {
                     resImmVulMessage = '*IMMUNE*'
@@ -234,11 +239,11 @@ export class BattleService {
             }
         }
 
-        // The entities that have cast a spell in this round will regain slots in the next one
+        // The entities that have spent or lost energy slots this round will regain slots in the next one
         for (const entity of Array.from(turnActions.keys())) {
 
             const turn = turnActions.get(entity);
-            if (turn.action === 'cas') {
+            if (entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
                 // Ospitaler Talent feature
                 if (entity.talent === Talent.Ospitaler) {
                     this.mustRegainSlots.set(entity, 2);
@@ -248,5 +253,6 @@ export class BattleService {
             }
         }
         clearInterval(this.battleTimer);
+        this.roundFinished = true;
     }
 }

@@ -39,12 +39,12 @@ export class Monster extends GameEntity {
         this.monsterType = monsterType;
 
         // Minor Foul and Major Foul type feature
-        if ( this.monsterType === MonsterType.MajorFoul || this.monsterType === MonsterType.MinorFoul ) {
+        if ( this.monsterType === MonsterType.MajorFoul || this.monsterType === MonsterType.LesserFoul ) {
            this.weapon.damageType = DamageType.Supernatural;
         }
 
         // Minor Foul and Major Undead type feature
-        if ( this.monsterType === MonsterType.MinorFoul || this.monsterType === MonsterType.MajorUndead ) {
+        if ( this.monsterType === MonsterType.LesserFoul || this.monsterType === MonsterType.MajorUndead ) {
             this.resistances.push( DamageType.Physical );
         }
 
@@ -54,7 +54,7 @@ export class Monster extends GameEntity {
         }
 
         // Minor Undead and Major Undead type feature
-        if ( this.monsterType === MonsterType.MinorUndead || this.monsterType === MonsterType.MajorUndead ) {
+        if ( this.monsterType === MonsterType.LesserUndead || this.monsterType === MonsterType.MajorUndead ) {
             this.vulnerabilities.push( DamageType.Light );
         }
     }
@@ -84,7 +84,7 @@ export class Monster extends GameEntity {
         let type = DamageType.Physical;
 
         // Foul Monsters Type Feature
-        if ( this.monsterType === MonsterType.MajorFoul || this.monsterType === MonsterType.MinorFoul ) {
+        if ( this.monsterType === MonsterType.MajorFoul || this.monsterType === MonsterType.LesserFoul ) {
             type = DamageType.Supernatural;
         }
 

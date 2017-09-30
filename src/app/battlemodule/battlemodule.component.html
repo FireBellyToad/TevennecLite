@@ -1,6 +1,7 @@
 <div class="row">
     <div class="col-md-12">
       <app-battleheader
+      [buttonDisabled] = "!battleService.roundFinished"
       (startRound) = "startRound($event)"></app-battleheader>
     </div>
 </div>
