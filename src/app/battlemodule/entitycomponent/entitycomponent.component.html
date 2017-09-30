@@ -1,0 +1,78 @@
+<div class="panel panel-default ">
+  <!-- Title -->
+  <div class="panel-heading clearfix ">
+    <h3>{{ entity.name }}</h3>
+    <p style =" font-style: italic;">
+      Lvl.{{ entity.level }} - {{ getMonsterTypeString()}} {{ getTalentString() }} {{ getRoleString() }} 
+    </p>
+  </div>
+  <div class="panel-body">
+    <div class="col-md-12">
+      <div class="row">
+        <div class="col-md-4"> 
+          
+          <!-- Attributes -->
+          <strong>Attributes: </strong> 
+          <div class="row" style="padding-top: 5px">
+            <div class="col-md-12">
+              <p>TOU: {{ entity.tou }}</p>
+              <p>AGI: {{ entity.agi }}</p>
+              <p>MIN: {{ entity.min }}</p>
+              <p>WIL: {{ entity.wil }}</p>
+            </div>
+          </div>
+        </div>
+    
+    <div class="col-xs-8"> 
+      <strong>Statistics: </strong> 
+      <div class="row" style="padding-top: 5px">
+        <div class="col-md-12">
+          <p>Hp: {{ entity.actualHP }}</p>
+        </div>
+      </div>
+
+      <!-- ATK, DEF -->
+      <div class="row" style="padding-top: 5px">
+        <div class="col-md-6">
+            <div class="row">
+              <div class="col-md-12" *ngIf="isCharacter()">
+                  <p >DEF: {{ entity.getDEF() }} ({{ entity.armor.name}})</p> 
+              </div>
+              <div class="col-md-12" *ngIf="isMonster()">
+                  <p >DEF: {{ entity.getDEF() }}</p> 
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                  <p>{{ entity.hasDoubleAttack() ? '2 x ': '' }} {{ entity.weapon.name }} (+{{ entity.getATK() }}): 1d{{ entity.weapon.weaponDice }} + {{ entity.getDamageRoll().modifier }} </p> 
+              </div>
+            </div>
+        </div>
+      </div>
+
+        <!-- Magic -->
+        <strong>Magic: </strong> 
+        <div class="row" style="padding-top: 5px">
+          <div class="col-md-6">
+            <div class="row">
+              <div class="col-md-12" style= "color: gray">
+                  <strong *ngIf="entity.availableSlots >= 1">O</strong> 
+                  <strong *ngIf="entity.occupiedSlots >= 1">-</strong> 
+                  <strong *ngIf="entity.availableSlots >= 2">O</strong> 
+                  <strong *ngIf="entity.occupiedSlots >= 2">-</strong> 
+                  <strong *ngIf="entity.availableSlots >= 3">O</strong> 
+                  <strong *ngIf="entity.occupiedSlots >= 3">-</strong> 
+                  <strong *ngIf="entity.availableSlots >= 4">O</strong> 
+                  <strong *ngIf="entity.occupiedSlots >= 4">-</strong> 
+                  <strong *ngIf="entity.availableSlots >= 5">O</strong> 
+                  <strong *ngIf="entity.occupiedSlots >= 5">-</strong> 
+                  <strong *ngIf="entity.availableSlots >= 6">O</strong> 
+                  <strong *ngIf="entity.occupiedSlots >= 6">-</strong> 
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

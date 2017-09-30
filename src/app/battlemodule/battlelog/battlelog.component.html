@@ -1,0 +1,14 @@
+<div class="panel panel-default">
+    <div class="panel-body console">
+        <div class="row">
+            <div class="col-md-12">
+                <ol>
+                    <li *ngFor=" let entry of logger.getLog()"
+                        [ngStyle] = "{ color: entry.textColor }">
+                        {{ entry.text }}
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>

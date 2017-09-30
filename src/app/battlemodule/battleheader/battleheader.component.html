@@ -1,0 +1,41 @@
+<div class="panel panel-default ">
+  <div class="panel-body">
+    <div class="row">
+
+      <div class="col-md-2">
+        <button 
+          class="btn btn-success"
+          (click) = "startBattleRound()">Start round</button>
+      </div>
+        
+      <div class="col-md-10" *ngIf="false">
+        <div class="row">      
+          <div class="form-group" id="actionToTake">   
+            <label class="radio-inline">
+              <input type="radio" checked [value]= "actionToTake" value="atk">Attack
+            </label> 
+            <label class="radio-inline">
+              <input type="radio" [value]= "actionToTake" value="cas">Cast Spell
+            </label>
+          </div>
+        </div>
+
+        <div class="row">      
+          <div class="form-group">   
+            <div class="col-md-12">
+              <label>Select Spell</label>
+              <select class="form-control" (change) = "setSpellToCast($event)">
+                <option 
+                  *ngFor=" let spell of spellList"
+                  [value] = "spell">
+                  {{ spell }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,5 @@
+div .console{    
+    overflow-y: scroll;
+    height: 200px;
+    scroll-behavior: smooth;
+}
