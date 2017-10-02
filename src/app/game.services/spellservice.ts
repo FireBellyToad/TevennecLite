@@ -5,6 +5,7 @@ import { DamageType } from 'app/game.utils/damagetypes';
 import { Logger } from 'app/game.services/logger';
 import { Injectable } from '@angular/core';
 import { SavingThrow } from 'app/game.utils/savingthrow';
+import { StandardDiceRoll } from 'app/game.dicerollers/standarddiceroll';
 
 @Injectable()
 export class SpellService {
@@ -16,6 +17,22 @@ export class SpellService {
     constructor(log: Logger) {
         this.log = log
         this.spells = [{
+            name: 'Medico',
+            spellLevel: 1,
+            slotExpendend: 1,
+            isAura: false,
+            cast: function (targets: GameEntity[], caster: GameEntity) {
+
+                // The target gains 1d8+(Wil*2) hp
+                log.addEntry(caster.name + ' casts ' + this.name);
+
+                const cureRoll = new StandardDiceRoll(1, 8, caster.wil * 2);
+
+                targets[0].gainHP(cureRoll.totalResult);
+
+                log.addEntry(targets[0].name + ' gains ' + cureRoll.toString() + ' Hp');
+            }
+        }, {
             name: 'Sagitta',
             spellLevel: 1,
             slotExpendend: 1,
@@ -77,11 +94,11 @@ export class SpellService {
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target takes 1d3+(Wil) damage, TOU save halves
-                
+
                 const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(), caster.getDifficultyClass());
                 log.addEntry(caster.name + ' casts ' + this.name);
 
-                const dmg = new DamageRoll(1, 3, caster.wil, DamageType.Darkness, false,  savingThrow.hasSuccess());
+                const dmg = new DamageRoll(1, 3, caster.wil, DamageType.Darkness, false, savingThrow.hasSuccess());
                 const finalDamage = targets[0].takeDamageFromRoll(dmg);
 
                 log.addSavingThrowEntry(targets[0].name, savingThrow.saveRoll.toString(),
@@ -100,6 +117,22 @@ export class SpellService {
                     finalDamage.toString(),
                     resImmVulMessage);
             }
+        }, {
+            name: 'Cure Wounds',
+            spellLevel: 1,
+            slotExpendend: 2,
+            isAura: false,
+            cast: function (targets: GameEntity[], caster: GameEntity) {
+
+                // The target gains 1d4+(Wil) hp
+                log.addEntry(caster.name + ' casts ' + this.name);
+
+                const cureRoll = new StandardDiceRoll(1, 4, caster.wil);
+
+                targets[0].gainHP(cureRoll.totalResult);
+
+                log.addEntry(targets[0].name + ' gains ' + cureRoll.toString() + ' Hp');
+            }
         }];
     }
 
@@ -107,7 +140,7 @@ export class SpellService {
         return this.spells;
     }
     getSpellByName(name: string): Castable {
-        return this.spells.find( sp => sp.name === name);
+        return this.spells.find(sp => sp.name === name);
     }
 }
 

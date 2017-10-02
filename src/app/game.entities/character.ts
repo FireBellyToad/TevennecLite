@@ -212,11 +212,11 @@ export class Character extends GameEntity {
     }
 
     attemptBlock(): boolean {
-        let blockValue = this.agi + 5;
+        let blockValue = this.agi + 3;
 
         // Duelist Talent feature
         if (this.talent === Talent.Duelist) {
-            blockValue = (this.agi * 2) + 5;
+            blockValue = (this.agi * 2) + 3;
         }
 
         return this.shield != null && new StandardDiceRoll(1, 20).totalResult <= (blockValue);

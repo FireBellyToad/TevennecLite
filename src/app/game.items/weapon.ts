@@ -11,16 +11,18 @@ export class Weapon extends Item {
     damageType: DamageType;
     powers: Map<Power, number> = new Map<Power, number>();
 
-    constructor( name: string, numberOfDices: number, weaponDice: number, type: WeaponType[] = [], powers = new Map<Power, number>() ) {
+    constructor(name: string, numberOfDices: number, weaponDice: number, type: WeaponType[] = [], 
+                value = 0, powers = new Map<Power, number>()) {
         super();
         this.name = name;
         this.numberOfDices = numberOfDices;
         this.weaponDice = weaponDice;
         this.types = type;
         this.powers = powers;
+        this.value = value;
 
-        if ( this.value > 0 || this.powers.size > 0 ) {
-            if ( this.powers.has( Power.Luminous ) ) {
+        if (this.value > 0 || this.powers.size > 0) {
+            if (this.powers.has(Power.Luminous)) {
                 this.damageType = DamageType.Light;
             } else {
                 this.damageType = DamageType.Supernatural;

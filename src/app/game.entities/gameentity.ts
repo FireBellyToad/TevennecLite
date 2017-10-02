@@ -140,6 +140,10 @@ export abstract class GameEntity {
         this.actualHP = this.maxHp;
     }
 
+    gainHP(value: number) {
+        this.actualHP = Math.min(this.maxHp, this.actualHP + value);
+    }
+
     takeDamageFromRoll(roll: DamageRoll): number {
 
         let totalDamage = roll.damageRoll.totalResult
@@ -174,6 +178,10 @@ export abstract class GameEntity {
     }
 
     // Energy Slots, return false if can't cast
+    canCast(spellName: string): boolean {
+        return (this.spellsKnown.has(spellName) && this.availableSlots >= this.spellsKnown.get(spellName).slotExpendend)
+    }
+
     spendEnergySlots(toSpend: number): boolean {
 
 

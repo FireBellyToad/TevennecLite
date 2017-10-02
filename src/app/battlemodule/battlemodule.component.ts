@@ -39,8 +39,8 @@ export class BattlemoduleComponent implements OnInit {
     this.spellService = spellService;
     this.battleService = battleService;
     this.characterService = characterService;
-    this.char = characterService.getCharacterByName('Bill');
-    this.mons = characterService.getMonsterByName('Ogre');
+    this.char = characterService.getCharacterByName('Regrell');
+    this.mons = characterService.getMonsterByName('Risen Soldier');
    }
 
   ngOnInit() {

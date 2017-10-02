@@ -13,12 +13,12 @@ import { Talent } from 'app/game.enums/talents';
 @Injectable()
 export class BattleService {
 
-    battleTimer;
+    private battleTimer;
     roundFinished = true;
     logger: Logger;
 
     // Second parameter is a countdown for the regain to happen
-    mustRegainSlots = new Map<GameEntity, number>();
+    private mustRegainSlots = new Map<GameEntity, number>();
 
     constructor(logger: Logger) {
         this.logger = logger;
@@ -69,20 +69,16 @@ export class BattleService {
         for (const entity of entitiesInBattle) {
 
             if (entity instanceof Monster) {
-                if ( entity.min > 2 && entity.availableSlots >= entity.spellsKnown.get('Cause Wounds').slotExpendend ) {
-                    turnActions.set(entity, { action: 'cas', spell: 'Cause Wounds', target: monsterTargets[0] });
-                } else {
-                    turnActions.set(entity, { action: 'atk', spell: '', target: monsterTargets[0] });
-                }
+                turnActions.set(entity, this.getMonsterAction(entity, monsterTargets));
             } else {
-                turnActions.set(entity, playerTurnAction);
+                // turnActions.set(entity, playerTurnAction);
+                turnActions.set(entity, this.getMonsterAction(entity, [playerTurnAction.target]));
             }
 
+            clearInterval(this.battleTimer);
+            this.battleTimer = setInterval(() => { this.doResolveTurns(turnActions) }, 1500);
+
         }
-
-        clearInterval(this.battleTimer);
-        this.battleTimer = setInterval(() => { this.doResolveTurns(turnActions) }, 1500);
-
     }
 
     // Resolve Turns actions
@@ -254,5 +250,36 @@ export class BattleService {
         }
         clearInterval(this.battleTimer);
         this.roundFinished = true;
+    }
+
+    private getMonsterAction(entity: GameEntity, targets: GameEntity[]): { action: string, spell: string, target: GameEntity } {
+
+        // Dumb monsters or spell less just attack
+        if (entity.min < 2 || entity.spellsKnown.size === 0) {
+            return { action: 'atk', spell: '', target: targets[0] };
+        } else {
+
+            // If the monster is hurt badly and can cure himself, he will do
+            if ((entity.canCast('Cure Wounds') || entity.canCast('Medico')) && (entity.actualHP / entity.maxHp) <= 0.3) {
+                if (entity.spellsKnown.has('Cure Wounds')) {
+                    return { action: 'cas', spell: 'Cure Wounds', target: entity }
+                } else {
+                    return { action: 'cas', spell: 'Medico', target: entity }
+                }
+            }
+
+            // If the monster could cast a non-cure spell, he will do, or else he will attack
+            for (const spellChosen of Array.from(entity.spellsKnown.keys())) {
+                if ((entity.availableSlots >= entity.spellsKnown.get(spellChosen).slotExpendend) &&
+                    (spellChosen !== 'Cure Wounds' && spellChosen !== 'Medico')) {
+
+                    return { action: 'cas', spell: spellChosen, target: targets[0] }
+                }
+            }
+
+            // Just attack
+            return { action: 'atk', spell: '', target: targets[0] };
+
+        }
     }
 }

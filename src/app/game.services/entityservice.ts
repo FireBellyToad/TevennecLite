@@ -17,41 +17,45 @@ export class EntitiesService {
     char: Character[];
     mons: Monster[];
 
-    constructor( spellService: SpellService ) {
+    constructor(spellService: SpellService) {
         this.spellService = spellService;
 
         this.char = [
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Exemplar,
-            ItemFactory.PITCHFORK, null, null, this.spellService.getSpells()),
-            new Character('Regrell', 2, 1, 2, 0, 2, Role.Fighter, Talent.Exemplar,
-            null, null, null, this.spellService.getSpells()),
-            new Character( 'Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
-                            ItemFactory.MACE, null, ItemFactory.SHIELD, [this.spellService.getSpellByName('Sagitta')])
+                ItemFactory.PITCHFORK, null, null, this.spellService.getSpells()),
+            new Character('Regrell', 4, 2, 2, 1, 7, Role.Fighter, Talent.Exemplar,
+                ItemFactory.getMagicGreatSword(), ItemFactory.FULL_PLATE, null, [this.spellService.getSpellByName('Medico')]),
+            new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
+                ItemFactory.MACE, null, ItemFactory.SHIELD, [this.spellService.getSpellByName('Medico'),
+                this.spellService.getSpellByName('Deflagratio')])
         ];
         this.mons = [
-            new Monster( 'Lesser Daemon', 0, 1, 2, 1, 2,
-                         Role.Sorcerer, Talent.Generic, MonsterType.LesserFoul,
-                         new Weapon( 'Smash', 1, 3, [WeaponType.OneHanded, WeaponType.Bludgeoning]),
-                         [this.spellService.getSpellByName('Cause Wounds')]),
-            new Monster( 'Ogre', 5, 2, 0, 0, 4,
-                         Role.Brute, Talent.Big, MonsterType.LesserFoul,
-                         new Weapon( 'Smash', 1, 6, [WeaponType.OneHanded, WeaponType.Bludgeoning])),
-            new Monster( 'Rabid Dog', 0, -2, -2, -2, 1,
-                          Role.Brute, Talent.Generic, MonsterType.Native,
-                          new Weapon( 'Bite', 1, 2, [WeaponType.OneHanded, WeaponType.Piercing])),
-            new Monster( 'Necrospecter', 3, 2, 2, 1, 4,
-                         Role.Brute, Talent.Quick, MonsterType.LesserUndead,
-                         new Weapon( 'Claw', 1, 4, [WeaponType.OneHanded, WeaponType.Slashing])),
-            new Monster( 'Death Giant', 8, 2, 2, 1, 9,
-                         Role.Brute, Talent.Big, MonsterType.MajorUndead,
-                         new Weapon( 'Smash', 1, 12, [WeaponType.OneHanded, WeaponType.Bludgeoning]))];
+            new Monster('Lesser Daemon', 0, 1, 2, 1, 2,
+                Role.Sorcerer, Talent.Generic, MonsterType.LesserFoul,
+                new Weapon('Smash', 1, 3, [WeaponType.OneHanded, WeaponType.Bludgeoning]),
+                [this.spellService.getSpellByName('Cause Wounds')]),
+            new Monster('Ogre', 5, 2, 0, 0, 4,
+                Role.Brute, Talent.Big, MonsterType.LesserFoul,
+                new Weapon('Smash', 1, 6, [WeaponType.OneHanded, WeaponType.Bludgeoning])),
+            new Monster('Rabid Dog', 0, -2, -2, -2, 1,
+                Role.Brute, Talent.Generic, MonsterType.Native,
+                new Weapon('Bite', 1, 2, [WeaponType.OneHanded, WeaponType.Piercing])),
+            new Monster('Necrospecter', 3, 2, 2, 1, 4,
+                Role.Brute, Talent.Quick, MonsterType.LesserUndead,
+                new Weapon('Claw', 1, 4, [WeaponType.OneHanded, WeaponType.Slashing])),
+            new Monster('Risen Soldier', 4, 4, 2, 2, 7,
+                Role.Brute, Talent.Trained, MonsterType.MajorUndead,
+                ItemFactory.SHORT_SWORD, [this.spellService.getSpellByName('Cure Wounds')]),
+            new Monster('Death Giant', 8, 2, 2, 1, 9,
+                Role.Brute, Talent.Big, MonsterType.MajorUndead,
+                new Weapon('Smash', 1, 12, [WeaponType.OneHanded, WeaponType.Bludgeoning]))];
     }
 
-    getCharacterByName( name: string ) {
-        return this.char.find( ( char: Character ) => char.name === name );
+    getCharacterByName(name: string) {
+        return this.char.find((char: Character) => char.name === name);
     }
 
-    getMonsterByName( name: string ) {
-        return this.mons.find( ( mons: Monster ) => mons.name === name );
+    getMonsterByName(name: string) {
+        return this.mons.find((mons: Monster) => mons.name === name);
     }
 }

@@ -13,5 +13,6 @@ export enum Talent {
     Lethal,
     Generic,
     Quick,
-    Big
+    Big,
+    Trained
 }
