@@ -1,5 +1,6 @@
 import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
 import { EntitiesService } from 'app/game.services/entityservice';
+import { Character } from 'app/game.entities/character';
 
 @Component({
   selector: 'app-battleheader',
@@ -8,26 +9,33 @@ import { EntitiesService } from 'app/game.services/entityservice';
 })
 export class BattleheaderComponent implements OnInit {
 
-  @Input() buttonDisabled= false;
-  @Output() startRound = new EventEmitter<{action: string, spell: string}>();
+  @Input() buttonDisabled = false;
+  @Input() currentChar: Character;
+  @Output() startRound = new EventEmitter<{ action: string, spell: string }>();
   spellList: string[];
   spellTocast: string;
   actionToTake: string;
   characterService: EntitiesService;
+  numberOfResets = 0;
 
-  constructor( characterService: EntitiesService ) {
+  constructor(characterService: EntitiesService) {
     this.characterService = characterService;
-    this.spellList = Array.from( characterService.getCharacterByName('Regrell').spellsKnown.keys() );
-   }
-
-  ngOnInit() {
   }
 
-  setSpellToCast( event ) {
+  ngOnInit() {
+    this.spellList = Array.from(this.currentChar.spellsKnown.keys());
+  }
+
+  setSpellToCast(event) {
     this.spellTocast = event.value;
   }
 
   startBattleRound() {
     this.startRound.emit({ action: this.actionToTake, spell: this.spellTocast });
+  }
+
+  resetCharLife() {
+    this.numberOfResets++;
+    this.currentChar.actualHP = this.currentChar.maxHp;
   }
 }

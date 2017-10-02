@@ -28,10 +28,13 @@ export class Character extends GameEntity {
 
         super(name, tou, agi, min, wil, level, role, talent, spells);
 
+        this.actualHP -= 4;
+        this.maxHp -= 4;
+
 
         if (this.role === Role.Fighter) {
 
-            this.weapon = weapon === null ? ItemFactory.SHORT_SWORD : weapon;
+            this.weapon = weapon === null ? ItemFactory.LONG_SWORD : weapon;
             this.armor = armor === null ? ItemFactory.LEATHER_ARMOR : armor;
 
             if (!this.weapon.types.includes(WeaponType.TwoHanded)) {
@@ -194,9 +197,9 @@ export class Character extends GameEntity {
         for (let lev = 0; lev < this.level - 1; lev++) {
 
             if (this.role === Role.Fighter && this.level >= 2) {
-                roll = new AdvantageDiceRoll(1, 6, 0);
+                roll = new AdvantageDiceRoll(1, 4, 0);
             } else {
-                roll = new StandardDiceRoll(1, 6, 0);
+                roll = new StandardDiceRoll(1, 4, 0);
             }
 
             this.levelupHpIncrements.push(roll.totalResult);

@@ -147,9 +147,9 @@ export abstract class GameEntity {
         if (this.hasImmunity(roll.damageType)) {
             return 0;
         } else if (this.hasResistance(roll.damageType)) {
-            totalDamage = Math.max(0, totalDamage - 5);
+            totalDamage = Math.max(0, totalDamage - 3);
         } else if (this.hasVulnerability(roll.damageType)) {
-            totalDamage += 5;
+            totalDamage += 3;
         }
 
         this.actualHP = Math.max(0, this.actualHP - totalDamage);
@@ -157,22 +157,6 @@ export abstract class GameEntity {
         return totalDamage;
     }
 
-    takeDamageFromValue(damage: number, damageType: DamageType) {
-
-        let totalDamage = damage
-
-        if (this.hasImmunity(damageType)) {
-            return 0;
-        } else if (this.hasResistance(damageType)) {
-            totalDamage = Math.max(0, totalDamage - 5);
-        } else if (this.hasVulnerability(damageType)) {
-            totalDamage += 5;
-        }
-
-        this.actualHP = Math.max(0, this.actualHP - totalDamage);
-
-        return totalDamage;
-    }
 
     isDead(): boolean {
         return this.actualHP <= 0;

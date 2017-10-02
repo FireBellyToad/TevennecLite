@@ -71,15 +71,22 @@ export class SpellService {
             }
         }, {
             name: 'Cause Wounds',
-            spellLevel: 4,
+            spellLevel: 1,
             slotExpendend: 2,
             isAura: false,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target takes 1d3+(Wil) damage, TOU save halves
+                
+                const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(), caster.getDifficultyClass());
                 log.addEntry(caster.name + ' casts ' + this.name);
-                const dmg = new DamageRoll(1, 3, caster.wil, DamageType.Darkness);
+
+                const dmg = new DamageRoll(1, 3, caster.wil, DamageType.Darkness, false,  savingThrow.hasSuccess());
                 const finalDamage = targets[0].takeDamageFromRoll(dmg);
+
+                log.addSavingThrowEntry(targets[0].name, savingThrow.saveRoll.toString(),
+                    savingThrow.difficultyClass.toString(),
+                    savingThrow.hasSuccess());
 
                 let resImmVulMessage = '';
                 if (targets[0].hasVulnerability(dmg.damageType)) {

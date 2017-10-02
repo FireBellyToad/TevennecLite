@@ -21,6 +21,8 @@ export class EntitiesService {
         this.spellService = spellService;
 
         this.char = [
+            new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Exemplar,
+            ItemFactory.PITCHFORK, null, null, this.spellService.getSpells()),
             new Character('Regrell', 2, 1, 2, 0, 2, Role.Fighter, Talent.Exemplar,
             null, null, null, this.spellService.getSpells()),
             new Character( 'Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,

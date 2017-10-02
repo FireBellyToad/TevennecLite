@@ -69,7 +69,7 @@ export class BattleService {
         for (const entity of entitiesInBattle) {
 
             if (entity instanceof Monster) {
-                if (entity.availableSlots >= entity.spellsKnown.get('Cause Wounds').slotExpendend ) {
+                if ( entity.min > 2 && entity.availableSlots >= entity.spellsKnown.get('Cause Wounds').slotExpendend ) {
                     turnActions.set(entity, { action: 'cas', spell: 'Cause Wounds', target: monsterTargets[0] });
                 } else {
                     turnActions.set(entity, { action: 'atk', spell: '', target: monsterTargets[0] });

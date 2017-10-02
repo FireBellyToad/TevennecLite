@@ -117,7 +117,7 @@ export class Monster extends GameEntity {
     protected addHpIncrements() {
 
         for ( let lev = 0; lev < this.level - 1 ; lev++  ) {
-            this.levelupHpIncrements.push( new StandardDiceRoll( 1, 6, 0).totalResult );
+            this.levelupHpIncrements.push( new StandardDiceRoll( 1, 4, 0).totalResult );
         }
 
     }

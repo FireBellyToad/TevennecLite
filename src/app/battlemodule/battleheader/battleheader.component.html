@@ -2,14 +2,19 @@
   <div class="panel-body">
     <div class="row">
 
-      <div class="col-md-2">
+      <div class="col-md-4">
         <button 
           class="btn btn-success"
           [disabled]="buttonDisabled"
           (click) = "startBattleRound()">Start round</button>
+        <button 
+          class="btn btn-danger"
+          [disabled]="buttonDisabled"
+          (click) = "resetCharLife()">Reset Character Life</button>
+        <p>Reset times: {{numberOfResets}}</p>
       </div>
         
-      <div class="col-md-10" *ngIf="false">
+      <div class="col-md-8" *ngIf="false">
         <div class="row">      
           <div class="form-group" id="actionToTake">   
             <label class="radio-inline">

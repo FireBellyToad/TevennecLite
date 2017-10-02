@@ -10,8 +10,10 @@ export class ItemFactory {
     // ------------------------------------- WEAPONS ------------------------------------- //
     static readonly UNARMED_STRIKE = new Weapon( 'Unarmed', 1, 2, [WeaponType.OneHanded, WeaponType.Bludgeoning]);
     static readonly SHORT_SWORD = new Weapon( 'Short sword', 1, 6, [WeaponType.OneHanded, WeaponType.Slashing] );
+    static readonly LONG_SWORD = new Weapon( 'Long sword', 1, 8, [WeaponType.OneHanded, WeaponType.Slashing] );
     static readonly MACE = new Weapon( 'Mace', 1, 4, [WeaponType.OneHanded, WeaponType.Bludgeoning] );
     static readonly GREAT_SWORD = new Weapon( 'Great sword', 1, 12, [WeaponType.TwoHanded, WeaponType.Slashing]);
+    static readonly PITCHFORK = new Weapon( 'Pitchfork', 1, 6, [WeaponType.TwoHanded, WeaponType.Piercing] );
 
 
     // ------------------------------------- ARMORS ------------------------------------- //
