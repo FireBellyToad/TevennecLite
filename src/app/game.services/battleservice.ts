@@ -71,14 +71,14 @@ export class BattleService {
             if (entity instanceof Monster) {
                 turnActions.set(entity, this.getMonsterAction(entity, monsterTargets));
             } else {
-                // turnActions.set(entity, playerTurnAction);
-                turnActions.set(entity, this.getMonsterAction(entity, [playerTurnAction.target]));
+                turnActions.set(entity, playerTurnAction);
+                // turnActions.set(entity, this.getMonsterAction(entity, [playerTurnAction.target]));
             }
 
-            clearInterval(this.battleTimer);
-            this.battleTimer = setInterval(() => { this.doResolveTurns(turnActions) }, 1500);
-
         }
+
+        clearInterval(this.battleTimer);
+        this.battleTimer = setInterval(() => { this.doResolveTurns(turnActions) }, 1500);
     }
 
     // Resolve Turns actions
@@ -239,7 +239,7 @@ export class BattleService {
         for (const entity of Array.from(turnActions.keys())) {
 
             const turn = turnActions.get(entity);
-            if (entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
+            if (!entity.isDead() && entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
                 // Ospitaler Talent feature
                 if (entity.talent === Talent.Ospitaler) {
                     this.mustRegainSlots.set(entity, 2);

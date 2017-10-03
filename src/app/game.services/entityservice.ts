@@ -24,10 +24,10 @@ export class EntitiesService {
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Exemplar,
                 ItemFactory.PITCHFORK, null, null, this.spellService.getSpells()),
             new Character('Regrell', 4, 2, 2, 1, 7, Role.Fighter, Talent.Exemplar,
-                ItemFactory.getMagicGreatSword(), ItemFactory.FULL_PLATE, null, [this.spellService.getSpellByName('Medico')]),
+                ItemFactory.getMagicGreatSword(), ItemFactory.FULL_PLATE, null, [this.spellService.getSpellByName('Sagitta'),
+                this.spellService.getSpellByName('Medico')]),
             new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
-                ItemFactory.MACE, null, ItemFactory.SHIELD, [this.spellService.getSpellByName('Medico'),
-                this.spellService.getSpellByName('Deflagratio')])
+                ItemFactory.getMagicMace(), null, ItemFactory.SHIELD, this.spellService.getSpells())
         ];
         this.mons = [
             new Monster('Lesser Daemon', 0, 1, 2, 1, 2,
@@ -43,6 +43,10 @@ export class EntitiesService {
             new Monster('Necrospecter', 3, 2, 2, 1, 4,
                 Role.Brute, Talent.Quick, MonsterType.LesserUndead,
                 new Weapon('Claw', 1, 4, [WeaponType.OneHanded, WeaponType.Slashing])),
+            new Monster('Succubus', 1, 3, 4, 4, 6,
+                Role.Sorcerer, Talent.Generic, MonsterType.LesserFoul,
+                new Weapon('Claw', 1, 4, [WeaponType.OneHanded, WeaponType.Slashing]),
+                [this.spellService.getSpellByName('Cause Serious Wounds')]),
             new Monster('Risen Soldier', 4, 4, 2, 2, 7,
                 Role.Brute, Talent.Trained, MonsterType.MajorUndead,
                 ItemFactory.SHORT_SWORD, [this.spellService.getSpellByName('Cure Wounds')]),

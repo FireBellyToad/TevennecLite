@@ -28,9 +28,9 @@ export class SpellService {
 
                 const cureRoll = new StandardDiceRoll(1, 8, caster.wil * 2);
 
-                targets[0].gainHP(cureRoll.totalResult);
+                caster.gainHP(cureRoll.totalResult);
 
-                log.addEntry(targets[0].name + ' gains ' + cureRoll.toString() + ' Hp');
+                log.addEntry(caster.name + ' gains ' + cureRoll.toString() + ' Hp');
             }
         }, {
             name: 'Sagitta',
@@ -99,6 +99,68 @@ export class SpellService {
                 log.addEntry(caster.name + ' casts ' + this.name);
 
                 const dmg = new DamageRoll(1, 3, caster.wil, DamageType.Darkness, false, savingThrow.hasSuccess());
+                const finalDamage = targets[0].takeDamageFromRoll(dmg);
+
+                log.addSavingThrowEntry(targets[0].name, savingThrow.saveRoll.toString(),
+                    savingThrow.difficultyClass.toString(),
+                    savingThrow.hasSuccess());
+
+                let resImmVulMessage = '';
+                if (targets[0].hasVulnerability(dmg.damageType)) {
+                    resImmVulMessage = '*VULNERABLE*'
+                } else if (targets[0].hasResistance(dmg.damageType)) {
+                    resImmVulMessage = '*RESISTANT*'
+                }
+                log.addDamageEntry(targets[0].name,
+                    caster.name,
+                    dmg.toString(),
+                    finalDamage.toString(),
+                    resImmVulMessage);
+            }
+        }, {
+            name: 'Cause Serious Wounds',
+            spellLevel: 2,
+            slotExpendend: 4,
+            isAura: false,
+            cast: function (targets: GameEntity[], caster: GameEntity) {
+
+                // The target takes (Wil)d4 damage, TOU save halves
+
+                const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(), caster.getDifficultyClass());
+                log.addEntry(caster.name + ' casts ' + this.name);
+
+                const dmg = new DamageRoll(caster.wil, 4, 0, DamageType.Darkness, false, savingThrow.hasSuccess());
+                const finalDamage = targets[0].takeDamageFromRoll(dmg);
+
+                log.addSavingThrowEntry(targets[0].name, savingThrow.saveRoll.toString(),
+                    savingThrow.difficultyClass.toString(),
+                    savingThrow.hasSuccess());
+
+                let resImmVulMessage = '';
+                if (targets[0].hasVulnerability(dmg.damageType)) {
+                    resImmVulMessage = '*VULNERABLE*'
+                } else if (targets[0].hasResistance(dmg.damageType)) {
+                    resImmVulMessage = '*RESISTANT*'
+                }
+                log.addDamageEntry(targets[0].name,
+                    caster.name,
+                    dmg.toString(),
+                    finalDamage.toString(),
+                    resImmVulMessage);
+            }
+        }, {
+            name: 'Cause Mortal Wounds',
+            spellLevel: 3,
+            slotExpendend: 6,
+            isAura: false,
+            cast: function (targets: GameEntity[], caster: GameEntity) {
+
+                // The target takes (Wil)d6 damage, TOU save halves
+
+                const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(), caster.getDifficultyClass());
+                log.addEntry(caster.name + ' casts ' + this.name);
+
+                const dmg = new DamageRoll(caster.wil, 6, 0, DamageType.Darkness, false, savingThrow.hasSuccess());
                 const finalDamage = targets[0].takeDamageFromRoll(dmg);
 
                 log.addSavingThrowEntry(targets[0].name, savingThrow.saveRoll.toString(),

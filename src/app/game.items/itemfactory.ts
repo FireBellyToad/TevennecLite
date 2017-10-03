@@ -27,6 +27,9 @@ export class ItemFactory {
     static getMagicShortSword(powers?: Map<Power, number>) {
         return new Weapon('Short sword', 1, 6, [WeaponType.OneHanded, WeaponType.Slashing], 1, powers);
     }
+    static getMagicMace(powers?: Map<Power, number>) {
+        return new Weapon('Mace', 1, 6, [WeaponType.OneHanded, WeaponType.Bludgeoning], 1, powers);
+    }
     static getMagicGreatSword(powers?: Map<Power, number>) {
         return new Weapon('Great sword', 1, 12, [WeaponType.TwoHanded, WeaponType.Slashing], 1, powers);
     }

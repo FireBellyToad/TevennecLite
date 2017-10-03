@@ -34,25 +34,27 @@ export class BattlemoduleComponent implements OnInit {
 
   roundNumber = 0;
 
-  constructor( logger: Logger, spellService: SpellService, characterService: EntitiesService, battleService: BattleService ) {
+  constructor(logger: Logger, spellService: SpellService, characterService: EntitiesService, battleService: BattleService) {
     this.logger = logger;
     this.spellService = spellService;
     this.battleService = battleService;
     this.characterService = characterService;
-    this.char = characterService.getCharacterByName('Regrell');
-    this.mons = characterService.getMonsterByName('Risen Soldier');
-   }
-
-  ngOnInit() {
   }
 
-  startRound( playerTurnAction: {action: string, spell: string} ) {
+  ngOnInit() {
+    this.char = this.characterService.getCharacterByName('Dalvert');
+    this.mons = this.characterService.getMonsterByName('Succubus');
+  }
+
+  startRound(playerTurnAction: { action: string, spell: string }) {
     this.roundNumber++;
 
-    const entitiesInBattle: GameEntity[] = [ this.char, this.mons];
-    const entitiesActions: { target: GameEntity , attacker: GameEntity , spells: Castable, damage: DamageRoll }[] = [];
+    const entitiesInBattle: GameEntity[] = [this.char, this.mons];
+    const entitiesActions: { target: GameEntity, attacker: GameEntity, spells: Castable, damage: DamageRoll }[] = [];
 
-    this.battleService.startRound( this.roundNumber, entitiesInBattle,  {action: 'atk', spell: 'Deflagratio', target: this.mons} );
+    this.battleService.startRound(this.roundNumber, entitiesInBattle, { action: playerTurnAction.action,
+                                                                        spell: playerTurnAction.spell,
+                                                                        target: this.mons });
 
   }
 }

@@ -13,8 +13,6 @@ export class BattleheaderComponent implements OnInit {
   @Input() currentChar: Character;
   @Output() startRound = new EventEmitter<{ action: string, spell: string }>();
   spellList: string[];
-  spellTocast: string;
-  actionToTake: string;
   characterService: EntitiesService;
   numberOfResets = 0;
 
@@ -26,12 +24,9 @@ export class BattleheaderComponent implements OnInit {
     this.spellList = Array.from(this.currentChar.spellsKnown.keys());
   }
 
-  setSpellToCast(event) {
-    this.spellTocast = event.value;
-  }
 
-  startBattleRound() {
-    this.startRound.emit({ action: this.actionToTake, spell: this.spellTocast });
+  startBattleRound( action: string, spell: string ) {
+    this.startRound.emit({ action: action, spell: spell });
   }
 
   resetCharLife() {

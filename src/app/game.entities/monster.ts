@@ -53,6 +53,11 @@ export class Monster extends GameEntity {
             this.immunities.push(DamageType.Physical);
         }
 
+        // All Monster Type except Natives Type Feature
+        if (this.monsterType !== MonsterType.Native) {
+            this.immunities.push(DamageType.Darkness);
+        }
+
         // Minor Undead and Major Undead type feature
         if (this.monsterType === MonsterType.LesserUndead || this.monsterType === MonsterType.MajorUndead) {
             this.vulnerabilities.push(DamageType.Light);
