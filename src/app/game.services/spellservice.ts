@@ -124,6 +124,40 @@ export class SpellService {
                 }
             }
         }, {
+            name: 'Phalanx',
+            spellLevel: 3,
+            slotExpendend: 2,
+            isAura: false,
+            cast: function (targets: GameEntity[], caster: GameEntity) {
+
+                // All the targets take 1d8+(Will) damage, Agi save halves
+                log.addEntry(caster.name + ' casts ' + this.name);
+                for (const target of targets) {
+
+                    const savingThrow = new SavingThrow(targets[0].getAgiSavingThrow(),
+                        caster.getDifficultyClass(),
+                        false,
+                        target.name,
+                        log);
+
+                    const dmg = new DamageRoll(1, 8, caster.getWil(), DamageType.Light, false,
+                        savingThrow.isSuccessful(), caster.talent === Talent.Luminous);
+
+                    const finalDamage = target.takeDamageFromRoll(dmg);
+
+                    let resImmVulMessage = '';
+                    if (target.hasVulnerability(dmg.damageType)) {
+                        resImmVulMessage = '*VULNERABLE*'
+                    }
+
+                    log.addDamageEntry(target.name,
+                        caster.name,
+                        dmg.toString(),
+                        finalDamage.toString(),
+                        resImmVulMessage);
+                }
+            }
+        }, {
             name: 'Cause Wounds',
             spellLevel: 1,
             slotExpendend: 2,
@@ -308,11 +342,11 @@ export class SpellService {
             isAura: false,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
-                // The target becomes Confused, WIL save negates
+                // The target becomes Maimed, TOU save negates
 
                 log.addEntry(caster.name + ' casts ' + this.name);
 
-                const savingThrow = new SavingThrow(targets[0].getWilSavingThrow(),
+                const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(),
                     caster.getDifficultyClass(),
                     targets[0].role === Role.Fighter && targets[0].level >= 8,
                     targets[0].name,

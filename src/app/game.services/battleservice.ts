@@ -229,29 +229,13 @@ export class BattleService {
                     resImmVulMessage = '*VULNERABLE*'
                 }
 
-                // Fighter Role Feature
-                if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 6) {
-                    if (hitEntry.attacker.weapon.types.includes(WeaponType.Bludgeoning)) {
-                        const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
-                            finalDamage,
-                            false,
-                            hitEntry.target.name,
-                            this.logger);
-
-                        if (!savingThrow.isSuccessful()) {
-
-                            hitEntry.target.takeCondition(Condition.Stunned, 1);
-                        }
-                    } else if (hitEntry.attacker.weapon.types.includes(WeaponType.Slashing) && hitEntry.damage.isCritical) {
-                        hitEntry.target.takeCondition(Condition.Maimed, -1);
-                    }
-                }
-
                 this.logger.addDamageEntry(hitEntry.target.name,
                     hitEntry.attacker.name,
                     hitEntry.damage.toString(),
                     finalDamage.toString(),
                     resImmVulMessage);
+
+                this.postAttackRoutine(hitEntry, finalDamage);
             }
         }
     }
@@ -278,6 +262,49 @@ export class BattleService {
 
         if (canCast) {
             spellTocast.cast([turn.target], entity);
+        }
+    }
+
+    postAttackRoutine(hitEntry: { target: GameEntity, attacker: GameEntity, damage: DamageRoll, processed: boolean }, finalDamage: number) {
+
+        // Big Talent Feature
+        if (hitEntry.attacker.talent === Talent.Big) {
+            const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
+                finalDamage,
+                false,
+                hitEntry.target.name,
+                this.logger);
+
+            if (!savingThrow.isSuccessful()) {
+
+                hitEntry.target.takeCondition(Condition.Stunned, 1);
+            }
+        }
+
+        // Lethal Talent Feature
+        if (hitEntry.attacker.talent === Talent.Lethal) {
+
+            const random = new StandardDiceRoll(1, hitEntry.attacker.spellsKnown.size);
+            const spellsTocast = Array.from(hitEntry.attacker.spellsKnown.values());
+            spellsTocast[random.totalResult - 1].cast([hitEntry.target], hitEntry.attacker);
+        }
+
+        // Fighter Role Feature
+        if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 6) {
+            if (hitEntry.attacker.weapon.types.includes(WeaponType.Bludgeoning)) {
+                const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
+                    finalDamage,
+                    false,
+                    hitEntry.target.name,
+                    this.logger);
+
+                if (!savingThrow.isSuccessful()) {
+
+                    hitEntry.target.takeCondition(Condition.Stunned, 1);
+                }
+            } else if (hitEntry.attacker.weapon.types.includes(WeaponType.Slashing) && hitEntry.damage.isCritical) {
+                hitEntry.target.takeCondition(Condition.Maimed, -1);
+            }
         }
     }
 
@@ -316,8 +343,8 @@ export class BattleService {
     // AI for Monsters
     private getMonsterAction(entity: GameEntity, targets: GameEntity[]): { action: string, spell: string, target: GameEntity } {
 
-        // Dumb monsters or spell less just attack
-        if (entity.getMin() < 2 || entity.spellsKnown.size === 0) {
+        // Dumb monsters, Lethal monsters or spell less just attack
+        if (entity.getMin() < 2 || entity.talent === Talent.Lethal || entity.spellsKnown.size === 0) {
             return { action: 'atk', spell: '', target: targets[0] };
         } else {
 
@@ -338,7 +365,7 @@ export class BattleService {
 
                     // Chose one spell randomly from the list, or the last one if no other has benn chosen
                     if (spellList.lastIndexOf(spellChosen) === spellList.length - 1 ||
-                        Math.max(1, Math.floor(Math.random() * 2)) === 2) {
+                        (new StandardDiceRoll(1, 3)).totalResult !== 1) {
 
                         return { action: 'cas', spell: spellChosen, target: targets[0] }
                     }

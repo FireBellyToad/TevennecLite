@@ -43,7 +43,7 @@ export class BattlemoduleComponent implements OnInit {
 
   ngOnInit() {
     this.char = this.characterService.getCharacterByName('Regrell');
-    this.mons = this.characterService.getMonsterByName('Boogeyman');
+    this.mons = this.characterService.getMonsterByName('The Giant');
   }
 
   startRound(playerTurnAction: { action: string, spell: string }) {

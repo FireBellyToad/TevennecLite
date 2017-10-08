@@ -204,9 +204,9 @@ export class Character extends GameEntity {
         for (let lev = 0; lev < this.level - 1; lev++) {
 
             if (this.role === Role.Fighter && this.level >= 2) {
-                roll = new AdvantageDiceRoll(1, 6, 0);
+                roll = new AdvantageDiceRoll(1, 4, 0);
             } else {
-                roll = new StandardDiceRoll(1, 6, 0);
+                roll = new StandardDiceRoll(1, 4, 0);
             }
 
             this.levelupHpIncrements.push(roll.totalResult);

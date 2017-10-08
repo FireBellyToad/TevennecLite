@@ -22,7 +22,7 @@
               <label>Select Action</label>   
               <select class="form-control" [disabled]="currentChar.cannotAct()" #actionToTake>
                   <option value = "atk">Attack</option>
-                  <option *ngIf= "spellList"  value = "cas">Cast a spell</option>
+                  <option *ngIf= "spellList.length > 0"  value = "cas">Cast a spell</option>
               </select>
             </div>
           </div>
