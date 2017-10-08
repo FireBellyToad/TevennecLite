@@ -13,6 +13,7 @@ export class BattleheaderComponent implements OnInit {
   @Input() currentChar: Character;
   @Output() startRound = new EventEmitter<{ action: string, spell: string }>();
   spellList: string[];
+  quickSpellList: string[];
   characterService: EntitiesService;
   numberOfResets = 0;
 
@@ -22,15 +23,17 @@ export class BattleheaderComponent implements OnInit {
 
   ngOnInit() {
     this.spellList = Array.from(this.currentChar.spellsKnown.keys());
+
   }
 
 
-  startBattleRound( action: string, spell: string ) {
+  startBattleRound(action: string, spell: string) {
     this.startRound.emit({ action: action, spell: spell });
   }
 
-  resetCharLife() {
+  resetChar() {
     this.numberOfResets++;
     this.currentChar.actualHP = this.currentChar.maxHp;
+    this.currentChar.conditions.clear();
   }
 }

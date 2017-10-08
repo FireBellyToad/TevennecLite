@@ -11,6 +11,7 @@ import { DamageType } from 'app/game.utils/damagetypes';
 import { WeaponType } from 'app/game.enums/weapontypes';
 import { SpellService } from 'app/game.services/spellservice';
 import { Castable } from 'app/game.spells/castable';
+import { Condition } from 'app/game.enums/conditions';
 
 export class Monster extends GameEntity {
 
@@ -50,6 +51,7 @@ export class Monster extends GameEntity {
 
         // Major Foul type feature
         if (this.monsterType === MonsterType.MajorFoul) {
+            this.resistances.push(DamageType.Supernatural);
             this.immunities.push(DamageType.Physical);
         }
 
@@ -101,7 +103,7 @@ export class Monster extends GameEntity {
             isCritical = this.lastAttackRoll.naturalResults[0] + this.min >= 20;
         }
 
-        return new DamageRoll(1, this.weapon.weaponDice, Math.floor(this.tou / 2), type, isCritical);
+        return new DamageRoll(1, this.weapon.weaponDice, Math.floor(this.tou / 2 ) - this.dmgPenalty, type, isCritical);
     }
 
     getDEF(): number {
@@ -112,7 +114,7 @@ export class Monster extends GameEntity {
             levelModifier = Math.floor(this.level / 3);
         }
 
-        return 8 + this.agi + levelModifier;
+        return 8 + this.agi + levelModifier - this.defPenalty;
     }
 
     protected getSavingThrow(attribute: number) {
@@ -122,17 +124,17 @@ export class Monster extends GameEntity {
     protected addHpIncrements() {
 
         for (let lev = 0; lev < this.level - 1; lev++) {
-            this.levelupHpIncrements.push(new StandardDiceRoll(1, 4, 0).totalResult);
+            this.levelupHpIncrements.push(new StandardDiceRoll(1, 6, 0).totalResult);
         }
 
     }
 
     hasDoubleAttack(): boolean {
-        return this.talent === Talent.Quick;
+        return !this.conditions.has(Condition.Maimed) && this.talent === Talent.Quick;
     }
 
     attemptBlock(): boolean {
-        return this.talent === Talent.Trained && new StandardDiceRoll(1, 20).totalResult <= (this.agi + 3);
+        return this.talent === Talent.Trained && new StandardDiceRoll(1, 20, this.agi + 3).totalResult >= 20;
     }
 
     canBeBlocked(): boolean {

@@ -2,76 +2,88 @@
   <!-- Title -->
   <div class="panel-heading clearfix ">
     <h3>{{ entity.name }}</h3>
-    <p style =" font-style: italic;">
-      Lvl.{{ entity.level }} - {{ getMonsterTypeString()}} {{ getTalentString() }} {{ getRoleString() }} 
+    <p style=" font-style: italic;">
+      Lvl.{{ entity.level }} - {{ getMonsterTypeString()}} {{ getTalentString() }} {{ getRoleString() }}
     </p>
   </div>
   <div class="panel-body">
     <div class="col-md-12">
       <div class="row">
-        <div class="col-md-3"> 
-          
+        <div class="col-md-3">
+
           <!-- Attributes -->
-          <strong>Attributes: </strong> 
+          <strong>Attributes: </strong>
           <div class="row" style="padding-top: 5px">
             <div class="col-md-12">
-              <p>TOU: {{ entity.tou }}</p>
-              <p>AGI: {{ entity.agi }}</p>
-              <p>MIN: {{ entity.min }}</p>
-              <p>WIL: {{ entity.wil }}</p>
+              <p [ngStyle]="{ color: entity.getTou() < 0 ? 'red' : 'black' }">TOU: {{ entity.getTou() }}</p>
+              <p [ngStyle]="{ color: entity.getAgi() < 0 ? 'red' : 'black' }">AGI: {{ entity.getAgi() }}</p>
+              <p [ngStyle]="{ color: entity.getMin() < 0 ? 'red' : 'black' }">MIN: {{ entity.getMin() }}</p>
+              <p [ngStyle]="{ color: entity.getWil() < 0 ? 'red' : 'black' }">WIL: {{ entity.getWil() }}</p>
             </div>
           </div>
         </div>
-    
-    <div class="col-md-9"> 
-      <strong>Statistics: </strong> 
-      <div class="row" style="padding-top: 5px">
-        <div class="col-md-12">
-          <p>Hp: {{ entity.actualHP }}</p>
-        </div>
-      </div>
 
-      <!-- ATK, DEF -->
-      <div class="row" style="padding-top: 5px">
-        <div class="col-md-6">
-            <div class="row">
-              <div class="col-md-12" *ngIf="isCharacter()">
-                  <p >DEF: {{ entity.getDEF() }} ({{ entity.armor.name}})</p> 
+        <div class="col-md-5">
+          <strong>Statistics: </strong>
+          <div class="row" style="padding-top: 5px">
+            <div class="col-md-12">
+              <p [ngStyle]="{ color: (entity.actualHP / entity.maxHp) <= 0.3 ? 'red' : 'green' }" >Hp: {{ entity.actualHP }}</p>
+            </div>
+          </div>
+
+          <!-- ATK, DEF -->
+          <div class="row" style="padding-top: 5px">
+            <div class="col-md-6">
+              <div class="row">
+                <div class="col-md-12" *ngIf="isCharacter()">
+                  <p>DEF: {{ entity.getDEF() }} ({{ entity.armor.name}})</p>
+                </div>
+                <div class="col-md-12" *ngIf="isMonster()">
+                  <p>DEF: {{ entity.getDEF() }}</p>
+                </div>
               </div>
-              <div class="col-md-12" *ngIf="isMonster()">
-                  <p >DEF: {{ entity.getDEF() }}</p> 
+              <div class="row">
+                <div class="col-md-12">
+                  <p>{{ entity.hasDoubleAttack() ? '2 x ': '' }} {{ entity.weapon.name }} (+{{ entity.getATK() }}): 1d{{ entity.weapon.weaponDice
+                    }} + {{ entity.getDamageRoll().modifier }} </p>
+                </div>
               </div>
             </div>
-            <div class="row">
-              <div class="col-md-12">
-                  <p>{{ entity.hasDoubleAttack() ? '2 x ': '' }} {{ entity.weapon.name }} (+{{ entity.getATK() }}): 1d{{ entity.weapon.weaponDice }} + {{ entity.getDamageRoll().modifier }} </p> 
-              </div>
-            </div>
-        </div>
-      </div>
+          </div>
 
-        <!-- Magic -->
-        <strong>Magic: </strong> 
-        <div class="row" style="padding-top: 5px">
-          <div class="col-md-6">
-            <div class="row">
-              <div class="col-md-12" style= "color: gray">
-                  <strong *ngIf="entity.availableSlots >= 1">O</strong> 
-                  <strong *ngIf="entity.occupiedSlots >= 1">-</strong> 
-                  <strong *ngIf="entity.availableSlots >= 2">O</strong> 
-                  <strong *ngIf="entity.occupiedSlots >= 2">-</strong> 
-                  <strong *ngIf="entity.availableSlots >= 3">O</strong> 
-                  <strong *ngIf="entity.occupiedSlots >= 3">-</strong> 
-                  <strong *ngIf="entity.availableSlots >= 4">O</strong> 
-                  <strong *ngIf="entity.occupiedSlots >= 4">-</strong> 
-                  <strong *ngIf="entity.availableSlots >= 5">O</strong> 
-                  <strong *ngIf="entity.occupiedSlots >= 5">-</strong> 
-                  <strong *ngIf="entity.availableSlots >= 6">O</strong> 
-                  <strong *ngIf="entity.occupiedSlots >= 6">-</strong> 
+          <!-- Magic -->
+          <strong>Magic: </strong>
+          <div class="row" style="padding-top: 5px">
+            <div class="col-md-6">
+              <div class="row">
+                <div class="col-md-12" style="color: gray">
+                  <strong *ngIf="entity.occupiedSlots >= 1">-</strong>
+                  <strong *ngIf="entity.availableSlots >= 1">O</strong>
+                  <strong *ngIf="entity.occupiedSlots >= 2">-</strong>
+                  <strong *ngIf="entity.availableSlots >= 2">O</strong>
+                  <strong *ngIf="entity.occupiedSlots >= 3">-</strong>
+                  <strong *ngIf="entity.availableSlots >= 3">O</strong>
+                  <strong *ngIf="entity.occupiedSlots >= 4">-</strong>
+                  <strong *ngIf="entity.availableSlots >= 4">O</strong>
+                  <strong *ngIf="entity.occupiedSlots >= 5">-</strong>
+                  <strong *ngIf="entity.availableSlots >= 5">O</strong>
+                  <strong *ngIf="entity.occupiedSlots >= 6">-</strong>
+                  <strong *ngIf="entity.availableSlots >= 6">O</strong>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        <div class="col-md-4">
+          <!-- Conditions -->
+          <strong>Conditions: </strong>
+          <p *ngFor=" let cond of getConditionList()" [ngStyle]="{ color: red }">
+            {{ getConditionString(cond) }}
+          </p>
+        </div>
+
+
       </div>
     </div>
   </div>

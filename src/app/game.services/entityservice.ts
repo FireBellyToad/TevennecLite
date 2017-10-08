@@ -23,10 +23,12 @@ export class EntitiesService {
         this.char = [
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Exemplar,
                 ItemFactory.PITCHFORK, null, null, this.spellService.getSpells()),
-            new Character('Regrell', 4, 2, 2, 1, 7, Role.Fighter, Talent.Exemplar,
+            new Character('Regrell', 4, 4, 2, 1, 10, Role.Fighter, Talent.Exemplar,
                 ItemFactory.getMagicGreatSword(), ItemFactory.FULL_PLATE, null, [this.spellService.getSpellByName('Sagitta'),
                 this.spellService.getSpellByName('Medico')]),
             new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
+                ItemFactory.getMagicMace(), null, ItemFactory.SHIELD, this.spellService.getSpells()),
+            new Character('Lissandra', 0, 0, 4, 4, 10, Role.Spellcaster, Talent.Luminous,
                 ItemFactory.getMagicMace(), null, ItemFactory.SHIELD, this.spellService.getSpells())
         ];
         this.mons = [
@@ -46,13 +48,18 @@ export class EntitiesService {
             new Monster('Succubus', 1, 3, 4, 4, 6,
                 Role.Sorcerer, Talent.Generic, MonsterType.LesserFoul,
                 new Weapon('Claw', 1, 4, [WeaponType.OneHanded, WeaponType.Slashing]),
-                [this.spellService.getSpellByName('Cause Serious Wounds')]),
+                [this.spellService.getSpellByName('Cause Serious Wounds'),
+                this.spellService.getSpellByName('Greater Mind Wave')]),
             new Monster('Risen Soldier', 4, 4, 2, 2, 7,
                 Role.Brute, Talent.Trained, MonsterType.MajorUndead,
                 ItemFactory.SHORT_SWORD, [this.spellService.getSpellByName('Cure Wounds')]),
             new Monster('Death Giant', 8, 2, 2, 1, 9,
                 Role.Brute, Talent.Big, MonsterType.MajorUndead,
-                new Weapon('Smash', 1, 12, [WeaponType.OneHanded, WeaponType.Bludgeoning]))];
+                new Weapon('Smash', 1, 12, [WeaponType.OneHanded, WeaponType.Bludgeoning])),
+            new Monster('Boogeyman', 6, 6, 4, 2, 10,
+                Role.Brute, Talent.Quick, MonsterType.MajorFoul,
+                new Weapon('Claw', 1, 8, [WeaponType.OneHanded, WeaponType.Slashing]),
+                [this.spellService.getSpellByName('Fear'), this.spellService.getSpellByName('Cause Serious Wounds')])];
     }
 
     getCharacterByName(name: string) {

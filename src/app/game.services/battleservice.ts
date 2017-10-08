@@ -9,6 +9,11 @@ import { Character } from 'app/game.entities/character';
 import { DiceRoll } from 'app/game.dicerollers/diceroll';
 import { StandardDiceRoll } from 'app/game.dicerollers/standarddiceroll';
 import { Talent } from 'app/game.enums/talents';
+import { Condition } from 'app/game.enums/conditions';
+import { Role } from 'app/game.enums/roles';
+import { WeaponType } from 'app/game.enums/weapontypes';
+import { SavingThrow } from 'app/game.utils/savingthrow';
+import { DamageType } from 'app/game.utils/damagetypes';
 
 @Injectable()
 export class BattleService {
@@ -31,8 +36,30 @@ export class BattleService {
         // Cleans log
         this.logger.addEntry('Round ' + roundNumber + ' Start', LogEntry.COLOR_GREEN);
 
-        this.battleTimer = setInterval(() => { this.rollRoundInitiative(entitiesInBattle, playerTurnAction) }, 1500);
+        this.battleTimer = setInterval(() => { this.manageConditions(entitiesInBattle, playerTurnAction) }, 1500);
 
+    }
+
+    // Manage entity conditions
+    manageConditions(entitiesInBattle: GameEntity[], playerTurnAction: { action: string, spell: string, target: GameEntity }) {
+
+
+        for (const entity of entitiesInBattle) {
+            // Clean all except for Dead condition
+            for (const condition of Array.from(entity.conditions.keys())) {
+                if (condition !== Condition.Dead && entity.conditions.get(condition) === 0) {
+                    entity.conditions.delete(condition);
+                }
+            }
+            entity.clearPenalties();
+
+            for (const condition of Array.from(entity.conditions.keys())) {
+                entity.takeCondition(condition);
+            }
+        }
+
+        clearInterval(this.battleTimer);
+        this.battleTimer = setInterval(() => { this.rollRoundInitiative(entitiesInBattle, playerTurnAction) }, 1500);
     }
 
     // Rolls initiative for all the entities and sorts the from higher to lower
@@ -40,7 +67,7 @@ export class BattleService {
 
         for (const entity of entitiesInBattle) {
 
-            if (!entity.isDead()) {
+            if (!entity.cannotAct()) {
                 entity.rollInitiative();
                 this.logger.addEntry(entity.name + ' rolled initiative: ' +
                     entity.getCurrentInitiative().toString(),
@@ -91,24 +118,39 @@ export class BattleService {
 
             // Cleans the hit json object array
 
-            if (!entity.isDead()) {
+            if (!entity.cannotAct()) {
 
-                const turn = turnActions.get(entity);
+                // If confused, on a 33% damages himself instead of acting
+                if (entity.conditions.has(Condition.Confused) && (new StandardDiceRoll(1, 3).totalResult === 1)) {
 
-                switch (turn.action) {
-                    case 'atk': {
-                        // Attack
-                        this.attackRoutine(entity, turn.target, entitiesHit);
-                        break;
+                    const dmg = new DamageRoll(1, 4, 0, DamageType.Untyped);
+                    entity.takeDamageFromRoll(dmg);
+
+                    this.logger.addDamageEntry(entity.name, 'confusion', dmg.toString());
+
+                } else {
+                    const turn = turnActions.get(entity);
+
+                    switch (turn.action) {
+                        case 'atk': {
+                            // Attack
+                            this.attackRoutine(entity, turn.target, entitiesHit);
+                            break;
+                        }
+                        case 'cas': {
+                            this.spellRoutine(entity, turn, entitiesHit);
+                            break;
+                        }
                     }
-                    case 'cas': {
-                        this.spellRoutine(entity, turn, entitiesHit);
-                    }
+
                 }
+
 
             } else {
                 // Dead
-                this.logger.addEntry(entity.name + ' is dead')
+                if (entity.conditions.has(Condition.Dead)) {
+                    this.logger.addEntry(entity.name + ' is dead')
+                }
             }
 
         }
@@ -160,36 +202,54 @@ export class BattleService {
         let finalDamage = 0;
         const canBlock = true;
         // Damaging each target hit
-        for (const hitTuple of entitiesHit.filter(en => en.processed !== true)) {
+        for (const hitEntry of entitiesHit.filter(en => en.processed !== true)) {
 
-            hitTuple.processed = true;
+            hitEntry.processed = true;
 
             // Block logic
             if (canBlock &&
-                hitTuple.attacker.canBeBlocked() &&
-                hitTuple.target.attemptBlock()) {
+                hitEntry.attacker.canBeBlocked() &&
+                hitEntry.target.attemptBlock()) {
 
-                this.logger.addEntry(hitTuple.target.name + ' blocked ' + hitTuple.attacker.name, LogEntry.COLOR_RED);
+                this.logger.addEntry(hitEntry.target.name + ' blocked ' + hitEntry.attacker.name, LogEntry.COLOR_RED);
 
             } else {
 
-                finalDamage = hitTuple.target.takeDamageFromRoll(hitTuple.damage);
+                finalDamage = hitEntry.target.takeDamageFromRoll(hitEntry.damage);
 
-                if (hitTuple.target.hasImmunity(hitTuple.damage.damageType)) {
+                if (hitEntry.target.hasImmunity(hitEntry.damage.damageType)) {
                     resImmVulMessage = '*IMMUNE*'
                 }
 
-                if (hitTuple.target.hasResistance(hitTuple.damage.damageType)) {
+                if (hitEntry.target.hasResistance(hitEntry.damage.damageType)) {
                     resImmVulMessage = '*RESISTANT*'
                 }
 
-                if (hitTuple.target.hasVulnerability(hitTuple.damage.damageType)) {
+                if (hitEntry.target.hasVulnerability(hitEntry.damage.damageType)) {
                     resImmVulMessage = '*VULNERABLE*'
                 }
 
-                this.logger.addDamageEntry(hitTuple.target.name,
-                    hitTuple.attacker.name,
-                    hitTuple.damage.toString(),
+                // Fighter Role Feature
+                if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 6) {
+                    if (hitEntry.attacker.weapon.types.includes(WeaponType.Bludgeoning)) {
+                        const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
+                            finalDamage,
+                            false,
+                            hitEntry.target.name,
+                            this.logger);
+
+                        if (!savingThrow.isSuccessful()) {
+
+                            hitEntry.target.takeCondition(Condition.Stunned, 1);
+                        }
+                    } else if (hitEntry.attacker.weapon.types.includes(WeaponType.Slashing) && hitEntry.damage.isCritical) {
+                        hitEntry.target.takeCondition(Condition.Maimed, -1);
+                    }
+                }
+
+                this.logger.addDamageEntry(hitEntry.target.name,
+                    hitEntry.attacker.name,
+                    hitEntry.damage.toString(),
                     finalDamage.toString(),
                     resImmVulMessage);
             }
@@ -203,6 +263,7 @@ export class BattleService {
         const spellTocast = entity.spellsKnown.get(turn.spell);
         let canCast = entity.spendEnergySlots(spellTocast.slotExpendend);
 
+        // For each time the caster has been hit, he tries to concentrate
         if (canCast) {
             for (const tar of entitiesHit.filter(en => en.target === entity)) {
                 if (!tar.target.attemptConcentration(tar.damage.damageRoll.totalResult)) {
@@ -216,7 +277,7 @@ export class BattleService {
         }
 
         if (canCast) {
-            spellTocast.cast([turn.target], entity)
+            spellTocast.cast([turn.target], entity);
         }
     }
 
@@ -239,7 +300,7 @@ export class BattleService {
         for (const entity of Array.from(turnActions.keys())) {
 
             const turn = turnActions.get(entity);
-            if (!entity.isDead() && entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
+            if (!entity.cannotAct() && entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
                 // Ospitaler Talent feature
                 if (entity.talent === Talent.Ospitaler) {
                     this.mustRegainSlots.set(entity, 2);
@@ -252,10 +313,11 @@ export class BattleService {
         this.roundFinished = true;
     }
 
+    // AI for Monsters
     private getMonsterAction(entity: GameEntity, targets: GameEntity[]): { action: string, spell: string, target: GameEntity } {
 
         // Dumb monsters or spell less just attack
-        if (entity.min < 2 || entity.spellsKnown.size === 0) {
+        if (entity.getMin() < 2 || entity.spellsKnown.size === 0) {
             return { action: 'atk', spell: '', target: targets[0] };
         } else {
 
@@ -268,12 +330,19 @@ export class BattleService {
                 }
             }
 
+            const spellList = Array.from(entity.spellsKnown.keys());
             // If the monster could cast a non-cure spell, he will do, or else he will attack
-            for (const spellChosen of Array.from(entity.spellsKnown.keys())) {
+            for (const spellChosen of spellList) {
                 if ((entity.availableSlots >= entity.spellsKnown.get(spellChosen).slotExpendend) &&
                     (spellChosen !== 'Cure Wounds' && spellChosen !== 'Medico')) {
 
-                    return { action: 'cas', spell: spellChosen, target: targets[0] }
+                    // Chose one spell randomly from the list, or the last one if no other has benn chosen
+                    if (spellList.lastIndexOf(spellChosen) === spellList.length - 1 ||
+                        Math.max(1, Math.floor(Math.random() * 2)) === 2) {
+
+                        return { action: 'cas', spell: spellChosen, target: targets[0] }
+                    }
+
                 }
             }
 

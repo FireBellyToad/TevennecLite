@@ -15,6 +15,7 @@ import { ItemFactory } from 'app/game.items/itemfactory';
 import { Shield } from 'app/game.items/shield';
 import { SpellService } from 'app/game.services/spellservice';
 import { Castable } from 'app/game.spells/castable';
+import { Condition } from 'app/game.enums/conditions';
 
 export class Character extends GameEntity {
 
@@ -58,7 +59,13 @@ export class Character extends GameEntity {
             this.actualHP += 3;
         }
 
-        // Templar Talent Feature
+        // Luminous Talent Feature
+        if (this.talent === Talent.Luminous) {
+            this.occupiedSlots = 1;
+            this.availableSlots = Math.max(0, this.availableSlots - 1);
+        }
+
+        // Corrupted Talent Feature
         if (this.talent === Talent.Corrupted) {
             this.resistances.push(DamageType.Darkness);
         }
@@ -101,7 +108,7 @@ export class Character extends GameEntity {
             magicBonus = this.weapon.powers.get(Power.Precise);
         }
 
-        return competence + Math.floor(this.agi / 2) + magicBonus;
+        return competence + Math.floor(this.getAgi() / 2) + magicBonus - this.atkPenalty;
     }
 
     getAttackRoll(): DiceRoll {
@@ -118,7 +125,7 @@ export class Character extends GameEntity {
 
     getDamageRoll(): DamageRoll {
 
-        let totalModifier = Math.floor(this.tou / 2);
+        let totalModifier = Math.floor(this.getTou() / 2) - this.dmgPenalty;
 
         // Fighter Lethal class feature
         if (this.role === Role.Fighter && this.level >= 4 &&
@@ -157,7 +164,7 @@ export class Character extends GameEntity {
         let isCritical = false;
 
         if (this.lastAttackRoll !== undefined) {
-            isCritical = this.lastAttackRoll.naturalResults[0] + this.min >= 20;
+            isCritical = this.lastAttackRoll.naturalResults[0] + this.getMin() >= 20;
         }
 
         return new DamageRoll(1, this.weapon.weaponDice, totalModifier, this.weapon.damageType, isCritical);
@@ -166,12 +173,12 @@ export class Character extends GameEntity {
     public getDEF(): number {
 
         // Check for Heavy armor cap
-        const maxAGi = this.armor.isHeavy() ? Math.min(2, this.agi) : this.agi;
+        const maxAGi = this.armor.isHeavy() ? Math.min(2, this.getAgi()) : this.getAgi();
 
         // Spells Modifier
         const spellsModifier = 0
 
-        return 8 + maxAGi + this.armor.getArmorDefBonus() + spellsModifier;
+        return 8 + maxAGi + this.armor.getArmorDefBonus() + spellsModifier - this.defPenalty;
     }
 
     protected getSavingThrow(attribute: number): DiceRoll {
@@ -197,9 +204,9 @@ export class Character extends GameEntity {
         for (let lev = 0; lev < this.level - 1; lev++) {
 
             if (this.role === Role.Fighter && this.level >= 2) {
-                roll = new AdvantageDiceRoll(1, 4, 0);
+                roll = new AdvantageDiceRoll(1, 6, 0);
             } else {
-                roll = new StandardDiceRoll(1, 4, 0);
+                roll = new StandardDiceRoll(1, 6, 0);
             }
 
             this.levelupHpIncrements.push(roll.totalResult);
@@ -208,18 +215,18 @@ export class Character extends GameEntity {
     }
 
     hasDoubleAttack(): boolean {
-        return this.weapon.powers.has(Power.Quick);
+        return !this.conditions.has(Condition.Maimed) && this.weapon.powers.has(Power.Quick);
     }
 
     attemptBlock(): boolean {
-        let blockValue = this.agi + 3;
+        let blockValue = this.getAgi() + 3;
 
         // Duelist Talent feature
         if (this.talent === Talent.Duelist) {
-            blockValue = (this.agi * 2) + 3;
+            blockValue = (this.getAgi() * 2) + 3;
         }
 
-        return this.shield != null && new StandardDiceRoll(1, 20).totalResult <= (blockValue);
+        return this.shield != null && new StandardDiceRoll(1, 20, blockValue).totalResult >= 20;
     }
 
     canBeBlocked(): boolean {

@@ -25,10 +25,10 @@ export class Logger {
         });
     }
 
-    addSavingThrowEntry(name: string, savingThrow: string, difficultyClass: string, made: boolean) {
+    addSavingThrowEntry(name: string, savingThrow: string, difficultyClass: string, made: boolean, retry = false) {
         this.logEntries.push({
-            text: name + ' try to save with ' + savingThrow + ' against ' + difficultyClass + ' ' + 
-            ( made ? '*SUCCEDED*' : '*FAILED*'),
+            text: name + (retry ? ' retries! ' : ' try to save with ') + savingThrow + ' against ' + difficultyClass + ' ' +
+            (made ? '*SUCCEDED*' : '*FAILED*'),
             textColor: LogEntry.COLOR_RED
         });
     }

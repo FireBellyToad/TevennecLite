@@ -5,6 +5,7 @@ import { Talent } from 'app/game.enums/talents';
 import { Monster } from 'app/game.entities/monster';
 import { MonsterType } from 'app/game.enums/monstertype';
 import { Character } from 'app/game.entities/character';
+import { Condition } from 'app/game.enums/conditions';
 
 @Component({
   selector: 'app-entitycomponent',
@@ -32,8 +33,8 @@ export class EntitycomponentComponent implements OnInit {
 
     let nameToShow = 'Human';
 
-    if ( this.entity instanceof Monster ) {
-      switch ( this.entity.monsterType ) {
+    if (this.entity instanceof Monster) {
+      switch (this.entity.monsterType) {
         case MonsterType.Native: {
           nameToShow = 'Native';
           break;
@@ -67,5 +68,13 @@ export class EntitycomponentComponent implements OnInit {
 
   getTalentString() {
     return Talent[this.entity.talent];
+  }
+
+  getConditionList(): Condition[] {
+    return Array.from(this.entity.conditions.keys());
+  }
+
+  getConditionString(condition: Condition): string {
+    return Condition[condition]
   }
 }

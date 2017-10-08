@@ -12,7 +12,7 @@ export abstract class DiceRoll {
 
     constructor(numberOfDices: number, dice: number, modifier = 0, maximized = false, halved = false) {
         this.dice = dice;
-        this.numberOfDices = numberOfDices;
+        this.numberOfDices = Math.max(1, numberOfDices);
         this.modifier = modifier;
         this.totalResult = 0;
         this.maximized = maximized;
