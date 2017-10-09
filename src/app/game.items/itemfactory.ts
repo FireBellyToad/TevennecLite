@@ -20,6 +20,7 @@ export class ItemFactory {
 
     static readonly UNARMORED = new Armor('Unarmored', 0, ArmorType.Light);
     static readonly LEATHER_ARMOR = new Armor('Leather armor', 3, ArmorType.Light);
+    static readonly CHAIN_MAIL = new Armor('Chain mail', 4, ArmorType.Light);
     static readonly FULL_PLATE = new Armor('Full plate', 8, ArmorType.Heavy);
     static readonly SHIELD = new Shield();
 

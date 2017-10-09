@@ -23,13 +23,13 @@ export class EntitiesService {
         this.char = [
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Exemplar,
                 ItemFactory.PITCHFORK),
-            new Character('Regrell', 3, 2, 2, 1, 5, Role.Fighter, Talent.Exemplar,
-                ItemFactory.GREAT_SWORD, ItemFactory.FULL_PLATE, null, [this.spellService.getSpellByName('Sagitta'),
+            new Character('Regrell', 4, 3, 3, 1, 10, Role.Fighter, Talent.Exemplar,
+                ItemFactory.getMagicGreatSword(), ItemFactory.FULL_PLATE, null, [this.spellService.getSpellByName('Sagitta'),
                 this.spellService.getSpellByName('Medico')]),
             new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
-                ItemFactory.getMagicMace(), null, ItemFactory.SHIELD, this.spellService.getSpells()),
+                ItemFactory.getMagicMace(), null, ItemFactory.SHIELD, this.spellService.getCharacterSpells()),
             new Character('Lissandra', 0, 0, 4, 4, 10, Role.Spellcaster, Talent.Luminous,
-                ItemFactory.getMagicMace(), null, ItemFactory.SHIELD, this.spellService.getSpells())
+                ItemFactory.getMagicMace(), ItemFactory.CHAIN_MAIL, ItemFactory.SHIELD, this.spellService.getCharacterSpells())
         ];
         this.mons = [
             new Monster('Lesser Daemon', 0, 1, 2, 1, 2,
@@ -65,6 +65,10 @@ export class EntitiesService {
             new Monster('Death Giant', 8, 2, 2, 1, 9,
                 Role.Brute, Talent.Big, MonsterType.MajorUndead,
                 new Weapon('Smash', 1, 12, [WeaponType.OneHanded, WeaponType.Bludgeoning])),
+            new Monster('Lich', 2, 4, 8, 6, 10,
+                Role.Sorcerer, Talent.Generic, MonsterType.MajorUndead,
+                new Weapon('Deadly touch', 1, 4, [WeaponType.OneHanded, WeaponType.Piercing]),
+                this.spellService.getMonsterSpells()),
             new Monster('Boogeyman', 6, 6, 4, 2, 10,
                 Role.Brute, Talent.Quick, MonsterType.MajorFoul,
                 new Weapon('Claw', 1, 8, [WeaponType.OneHanded, WeaponType.Slashing]),

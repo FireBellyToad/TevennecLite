@@ -29,8 +29,11 @@ export class Character extends GameEntity {
 
         super(name, tou, agi, min, wil, level, role, talent, spells);
 
-        this.actualHP -= 4;
-        this.maxHp -= 4;
+        // Bill is a NPC character
+        if (this.name === 'Bill') {
+            this.actualHP -= 4;
+            this.maxHp -= 4;
+        }
 
 
         if (this.role === Role.Fighter) {

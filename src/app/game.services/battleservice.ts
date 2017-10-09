@@ -31,7 +31,8 @@ export class BattleService {
 
 
     // Starts round
-    startRound(roundNumber, entitiesInBattle: GameEntity[], playerTurnAction: { action: string, spell: string, target: GameEntity }) {
+    startRound(roundNumber, entitiesInBattle: GameEntity[],
+        playerTurnAction: { action: string, spell: string, quickSpell: string, target: GameEntity }) {
         this.roundFinished = false;
         // Cleans log
         this.logger.addEntry('Round ' + roundNumber + ' Start', LogEntry.COLOR_GREEN);
@@ -41,16 +42,12 @@ export class BattleService {
     }
 
     // Manage entity conditions
-    manageConditions(entitiesInBattle: GameEntity[], playerTurnAction: { action: string, spell: string, target: GameEntity }) {
+    manageConditions(entitiesInBattle: GameEntity[],
+        playerTurnAction: { action: string, spell: string, quickSpell: string, target: GameEntity }) {
 
 
         for (const entity of entitiesInBattle) {
-            // Clean all except for Dead condition
-            for (const condition of Array.from(entity.conditions.keys())) {
-                if (condition !== Condition.Dead && entity.conditions.get(condition) === 0) {
-                    entity.conditions.delete(condition);
-                }
-            }
+            // Clean all penalties
             entity.clearPenalties();
 
             for (const condition of Array.from(entity.conditions.keys())) {
@@ -63,7 +60,8 @@ export class BattleService {
     }
 
     // Rolls initiative for all the entities and sorts the from higher to lower
-    rollRoundInitiative(entitiesInBattle: GameEntity[], playerTurnAction: { action: string, spell: string, target: GameEntity }) {
+    rollRoundInitiative(entitiesInBattle: GameEntity[],
+        playerTurnAction: { action: string, spell: string, quickSpell: string, target: GameEntity }) {
 
         for (const entity of entitiesInBattle) {
 
@@ -88,9 +86,10 @@ export class BattleService {
     }
 
     // Defines turn
-    doTurnsDefinition(entitiesInBattle: GameEntity[], playerTurnAction: { action: string, spell: string, target: GameEntity }) {
+    // tslint:disable-next-line:max-line-length
+    doTurnsDefinition(entitiesInBattle: GameEntity[], playerTurnAction: { action: string, spell: string, quickSpell: string, target: GameEntity }) {
 
-        const turnActions = new Map<GameEntity, { action: string, spell: string, target: GameEntity }>();
+        const turnActions = new Map<GameEntity, { action: string, spell: string, quickSpell: string, target: GameEntity }>();
         const monsterTargets = entitiesInBattle.filter(en => en instanceof Character);
 
         for (const entity of entitiesInBattle) {
@@ -109,7 +108,7 @@ export class BattleService {
     }
 
     // Resolve Turns actions
-    doResolveTurns(turnActions: Map<GameEntity, { action: string, spell: string, target: GameEntity }>) {
+    doResolveTurns(turnActions: Map<GameEntity, { action: string, spell: string, quickSpell: string, target: GameEntity }>) {
 
         const entitiesHit: { target: GameEntity, attacker: GameEntity, spells: Castable, damage: DamageRoll, processed: boolean }[] = [];
 
@@ -134,10 +133,17 @@ export class BattleService {
                     switch (turn.action) {
                         case 'atk': {
                             // Attack
+                            if (turn.quickSpell !== '') {
+                                this.spellRoutine(entity, turn, entitiesHit, true);
+                            }
+
                             this.attackRoutine(entity, turn.target, entitiesHit);
                             break;
                         }
                         case 'cas': {
+                            if (turn.quickSpell !== '') {
+                                this.spellRoutine(entity, turn, entitiesHit, true);
+                            }
                             this.spellRoutine(entity, turn, entitiesHit);
                             break;
                         }
@@ -241,10 +247,10 @@ export class BattleService {
     }
 
     // Spells Routine
-    private spellRoutine(entity: GameEntity, turn: { action: string, spell: string, target: GameEntity },
-        entitiesHit: { target: GameEntity, attacker: GameEntity, damage: DamageRoll }[]) {
+    private spellRoutine(entity: GameEntity, turn: { action: string, spell: string, quickSpell: string, target: GameEntity },
+        entitiesHit: { target: GameEntity, attacker: GameEntity, damage: DamageRoll }[], isQuickSpellCasting = false) {
 
-        const spellTocast = entity.spellsKnown.get(turn.spell);
+        const spellTocast = isQuickSpellCasting ? entity.spellsKnown.get(turn.quickSpell) : entity.spellsKnown.get(turn.spell);
         let canCast = entity.spendEnergySlots(spellTocast.slotExpendend);
 
         // For each time the caster has been hit, he tries to concentrate
@@ -304,6 +310,8 @@ export class BattleService {
                 }
             } else if (hitEntry.attacker.weapon.types.includes(WeaponType.Slashing) && hitEntry.damage.isCritical) {
                 hitEntry.target.takeCondition(Condition.Maimed, -1);
+            } else if (hitEntry.attacker.weapon.types.includes(WeaponType.Piercing) && hitEntry.damage.isCritical) {
+                hitEntry.target.takeCondition(Condition.Bleeding, 2);
             }
         }
     }
@@ -323,11 +331,18 @@ export class BattleService {
             }
         }
 
-        // The entities that have spent or lost energy slots this round will regain slots in the next one
         for (const entity of Array.from(turnActions.keys())) {
 
+            // Clean all finished conditions
+            for (const condition of Array.from(entity.conditions.keys())) {
+                if (condition !== Condition.Dead && entity.conditions.get(condition) === 0) {
+                    entity.conditions.delete(condition);
+                }
+            }
+
+            // The entities that have spent or lost energy slots this round will regain slots in the next one
             const turn = turnActions.get(entity);
-            if (!entity.cannotAct() && entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
+            if (!entity.conditions.has(Condition.Dead) && entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
                 // Ospitaler Talent feature
                 if (entity.talent === Talent.Ospitaler) {
                     this.mustRegainSlots.set(entity, 2);
@@ -341,20 +356,27 @@ export class BattleService {
     }
 
     // AI for Monsters
-    private getMonsterAction(entity: GameEntity, targets: GameEntity[]): { action: string, spell: string, target: GameEntity } {
+    // tslint:disable-next-line:max-line-length
+    private getMonsterAction(entity: GameEntity, targets: GameEntity[]): { action: string, spell: string, quickSpell: string, target: GameEntity } {
+
 
         // Dumb monsters, Lethal monsters or spell less just attack
         if (entity.getMin() < 2 || entity.talent === Talent.Lethal || entity.spellsKnown.size === 0) {
-            return { action: 'atk', spell: '', target: targets[0] };
+            return { action: 'atk', spell: '', quickSpell: '', target: targets[0] };
         } else {
 
+            let quickSpellMemo = '';
+
             // If the monster is hurt badly and can cure himself, he will do
-            if ((entity.canCast('Cure Wounds') || entity.canCast('Medico')) && (entity.actualHP / entity.maxHp) <= 0.3) {
-                if (entity.spellsKnown.has('Cure Wounds')) {
-                    return { action: 'cas', spell: 'Cure Wounds', target: entity }
+            if ((entity.canCast('Cure Wounds')) && (entity.actualHP / entity.maxHp) <= 0.3) {
+
+                // If is Sorcerer or Boss, he will quickcast it
+                if (entity.role === Role.Boss || entity.role === Role.Sorcerer) {
+                    quickSpellMemo = 'Cure Wounds';
                 } else {
-                    return { action: 'cas', spell: 'Medico', target: entity }
+                    return { action: 'cas', spell: 'Cure Wounds', quickSpell: '', target: entity }
                 }
+
             }
 
             const spellList = Array.from(entity.spellsKnown.keys());
@@ -363,18 +385,26 @@ export class BattleService {
                 if ((entity.availableSlots >= entity.spellsKnown.get(spellChosen).slotExpendend) &&
                     (spellChosen !== 'Cure Wounds' && spellChosen !== 'Medico')) {
 
-                    // Chose one spell randomly from the list, or the last one if no other has benn chosen
-                    if (spellList.lastIndexOf(spellChosen) === spellList.length - 1 ||
-                        (new StandardDiceRoll(1, 3)).totalResult !== 1) {
+                    // If is Sorcerer or Boss and is a 1st level spell, he will quickcast it
+                    if ((entity.role === Role.Boss || entity.role === Role.Sorcerer) &&
+                        entity.spellsKnown.get(spellChosen).spellLevel === 1) {
 
-                        return { action: 'cas', spell: spellChosen, target: targets[0] }
+                        quickSpellMemo = spellChosen;
+
+                    } else {
+                        // Chose one spell randomly from the list, or the last one if no other has been chosen
+                        if (spellList.lastIndexOf(spellChosen) === spellList.length - 1 ||
+                            (new StandardDiceRoll(1, 3)).totalResult !== 1) {
+
+                            return { action: 'cas', spell: spellChosen, quickSpell: quickSpellMemo, target: targets[0] }
+                        }
                     }
 
                 }
             }
 
             // Just attack
-            return { action: 'atk', spell: '', target: targets[0] };
+            return { action: 'atk', spell: '', quickSpell: quickSpellMemo, target: targets[0] };
 
         }
     }

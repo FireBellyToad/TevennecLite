@@ -43,18 +43,20 @@ export class BattlemoduleComponent implements OnInit {
 
   ngOnInit() {
     this.char = this.characterService.getCharacterByName('Regrell');
-    this.mons = this.characterService.getMonsterByName('The Giant');
+    this.mons = this.characterService.getMonsterByName('Lich');
   }
 
-  startRound(playerTurnAction: { action: string, spell: string }) {
+  startRound(playerTurnAction: { action: string, spell: string, quickSpell: string }) {
     this.roundNumber++;
 
     const entitiesInBattle: GameEntity[] = [this.char, this.mons];
-    const entitiesActions: { target: GameEntity, attacker: GameEntity, spells: Castable, damage: DamageRoll }[] = [];
 
-    this.battleService.startRound(this.roundNumber, entitiesInBattle, { action: playerTurnAction.action,
-                                                                        spell: playerTurnAction.spell,
-                                                                        target: this.mons });
+    this.battleService.startRound(this.roundNumber, entitiesInBattle, {
+      action: playerTurnAction.action,
+      spell: playerTurnAction.spell,
+      quickSpell: playerTurnAction.quickSpell,
+      target: this.mons
+    });
 
   }
 }

@@ -6,7 +6,7 @@
         <button 
           class="btn btn-success"
           [disabled]="buttonDisabled"
-          (click) = "startBattleRound(actionToTake.value,spellToCast.value)">Start round</button>
+          (click) = "startBattleRound(actionToTake.value,spellToCast.value,quickSpellToCast.value)">Start round</button>
         <button 
           class="btn btn-danger"
           [disabled]="buttonDisabled"
@@ -34,6 +34,14 @@
                 <select class="form-control" #spellToCast>
                   <option 
                     *ngFor=" let spell of spellList"
+                    [value] = "spell">
+                    {{ spell }}
+                  </option>
+                </select>
+                <label>Select Quick Spell</label>
+                <select class="form-control" #quickSpellToCast>
+                  <option 
+                    *ngFor=" let spell of quickSpellList"
                     [value] = "spell">
                     {{ spell }}
                   </option>

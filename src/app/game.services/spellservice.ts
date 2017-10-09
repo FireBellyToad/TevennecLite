@@ -24,6 +24,7 @@ export class SpellService {
             spellLevel: 1,
             slotExpendend: 1,
             isAura: false,
+            isMonsterSpell: false,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target gains 1d8+(Wil*2) hp
@@ -40,6 +41,7 @@ export class SpellService {
             spellLevel: 2,
             slotExpendend: 1,
             isAura: false,
+            isMonsterSpell: false,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // Removes one condition
@@ -54,6 +56,7 @@ export class SpellService {
             spellLevel: 2,
             slotExpendend: 1,
             isAura: false,
+            isMonsterSpell: false,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // Removes Curse or every condition
@@ -72,31 +75,44 @@ export class SpellService {
             spellLevel: 1,
             slotExpendend: 1,
             isAura: false,
+            isMonsterSpell: false,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
+                // Target takes 1d6+(Wil) light damage, AGI negates (only for tevennec Lite)
                 log.addEntry(caster.name + ' casts ' + this.name);
-                const dmg = new DamageRoll(1, 6, caster.getWil() * 2, DamageType.Light, false,
-                    false, caster.talent === Talent.Luminous);
-                const finalDamage = targets[0].takeDamageFromRoll(dmg);
 
-                let resImmVulMessage = '';
-                if (targets[0].hasVulnerability(dmg.damageType)) {
-                    resImmVulMessage = '*VULNERABLE*'
+                const savingThrow = new SavingThrow(targets[0].getAgiSavingThrow(),
+                    caster.getDifficultyClass(),
+                    targets[0].role === Role.Fighter && targets[0].level >= 8,
+                    targets[0].name,
+                    log);
+
+                if (!savingThrow.isSuccessful()) {
+
+                    const dmg = new DamageRoll(1, 6, caster.getWil(), DamageType.Light, false,
+                        false, caster.talent === Talent.Luminous);
+                    const finalDamage = targets[0].takeDamageFromRoll(dmg);
+
+                    let resImmVulMessage = '';
+                    if (targets[0].hasVulnerability(dmg.damageType)) {
+                        resImmVulMessage = '*VULNERABLE*'
+                    }
+                    log.addDamageEntry(targets[0].name,
+                        caster.name,
+                        dmg.toString(),
+                        finalDamage.toString(),
+                        resImmVulMessage);
                 }
-                log.addDamageEntry(targets[0].name,
-                    caster.name,
-                    dmg.toString(),
-                    finalDamage.toString(),
-                    resImmVulMessage);
             }
         }, {
             name: 'Deflagratio',
             spellLevel: 4,
             slotExpendend: 2,
             isAura: false,
+            isMonsterSpell: false,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
-                // All the targets take (Will)d6+(Will) damage, TOU save halves
+                // All the targets take 2d10+(Wil*2) damage, TOU save halves
                 log.addEntry(caster.name + ' casts ' + this.name);
                 for (const target of targets) {
 
@@ -106,7 +122,7 @@ export class SpellService {
                         target.name,
                         log);
 
-                    const dmg = new DamageRoll(caster.getWil(), 6, caster.getWil(), DamageType.Light, false,
+                    const dmg = new DamageRoll(2, 10, caster.getWil() * 2, DamageType.Light, false,
                         savingThrow.isSuccessful(), caster.talent === Talent.Luminous);
 
                     const finalDamage = target.takeDamageFromRoll(dmg);
@@ -128,6 +144,7 @@ export class SpellService {
             spellLevel: 3,
             slotExpendend: 2,
             isAura: false,
+            isMonsterSpell: false,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // All the targets take 1d8+(Will) damage, Agi save halves
@@ -162,6 +179,7 @@ export class SpellService {
             spellLevel: 1,
             slotExpendend: 2,
             isAura: false,
+            isMonsterSpell: true,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target takes 1d3+(Wil) damage, TOU save halves
@@ -194,6 +212,7 @@ export class SpellService {
             spellLevel: 2,
             slotExpendend: 4,
             isAura: false,
+            isMonsterSpell: true,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target takes 3d4 + (Wil) damage, TOU save halves
@@ -226,6 +245,7 @@ export class SpellService {
             spellLevel: 3,
             slotExpendend: 6,
             isAura: false,
+            isMonsterSpell: true,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target takes 6d4 + (Wil) damage, TOU save halves
@@ -258,6 +278,7 @@ export class SpellService {
             spellLevel: 1,
             slotExpendend: 2,
             isAura: false,
+            isMonsterSpell: true,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target gains 1d4+(Wil) hp
@@ -274,6 +295,7 @@ export class SpellService {
             spellLevel: 1,
             slotExpendend: 2,
             isAura: false,
+            isMonsterSpell: true,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target becomes Bleeding, WIL save negates
@@ -296,6 +318,7 @@ export class SpellService {
             spellLevel: 2,
             slotExpendend: 4,
             isAura: false,
+            isMonsterSpell: true,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target becomes Confused, WIL save negates
@@ -318,6 +341,7 @@ export class SpellService {
             spellLevel: 1,
             slotExpendend: 2,
             isAura: false,
+            isMonsterSpell: true,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target becomes Frightened, WIL save negates
@@ -340,6 +364,7 @@ export class SpellService {
             spellLevel: 2,
             slotExpendend: 4,
             isAura: false,
+            isMonsterSpell: true,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target becomes Maimed, TOU save negates
@@ -362,6 +387,7 @@ export class SpellService {
             spellLevel: 1,
             slotExpendend: 2,
             isAura: false,
+            isMonsterSpell: true,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target becomes Stunned, WIL save negates
@@ -382,8 +408,9 @@ export class SpellService {
         }, {
             name: 'Greater Mind Wave',
             spellLevel: 2,
-            slotExpendend: 1,
+            slotExpendend: 4,
             isAura: false,
+            isMonsterSpell: true,
             cast: function (targets: GameEntity[], caster: GameEntity) {
 
                 // The target becomes Paralized, WIL save negates
@@ -407,11 +434,15 @@ export class SpellService {
     getSpells(): Castable[] {
         return this.spells;
     }
-    getSpellByName(name: string): Castable {
-        return this.spells.find(sp => sp.name === name);
+
+    getCharacterSpells(): Castable[] {
+        return this.spells.filter((sp: Castable) => !sp.isMonsterSpell);
     }
-    getQuickCastable(minValue: number): Castable {
-        return this.spells.find(sp => sp.spellLevel + 2 <= minValue);
+    getMonsterSpells(): Castable[] {
+        return this.spells.filter((sp: Castable) => sp.isMonsterSpell);
+    }
+    getSpellByName(name: string): Castable {
+        return this.spells.find((sp: Castable) => sp.name === name);
     }
 }
 

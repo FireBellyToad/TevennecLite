@@ -45,7 +45,7 @@
               <div class="row">
                 <div class="col-md-12">
                   <p>{{ entity.hasDoubleAttack() ? '2 x ': '' }} {{ entity.weapon.name }} (+{{ entity.getATK() }}): 1d{{ entity.weapon.weaponDice
-                    }} + {{ entity.getDamageRoll().modifier }} </p>
+                    }} {{ getDamageModifierString(entity.getDamageRoll()) }} </p>
                 </div>
               </div>
             </div>

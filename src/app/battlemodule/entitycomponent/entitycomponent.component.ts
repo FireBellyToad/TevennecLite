@@ -6,6 +6,7 @@ import { Monster } from 'app/game.entities/monster';
 import { MonsterType } from 'app/game.enums/monstertype';
 import { Character } from 'app/game.entities/character';
 import { Condition } from 'app/game.enums/conditions';
+import { DamageRoll } from 'app/game.utils/damageroll';
 
 @Component({
   selector: 'app-entitycomponent',
@@ -76,5 +77,9 @@ export class EntitycomponentComponent implements OnInit {
 
   getConditionString(condition: Condition): string {
     return Condition[condition]
+  }
+
+  getDamageModifierString(damageRoll: DamageRoll): string {
+    return ((damageRoll.modifier === 0) ? '' : ((damageRoll.modifier < 0) ? '-' : '+') + Math.abs(damageRoll.modifier));
   }
 }
