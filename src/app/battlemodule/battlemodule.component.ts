@@ -15,6 +15,7 @@ import { Logger } from 'app/game.services/logger';
 import { SpellService } from 'app/game.services/spellservice';
 import { EntitiesService } from 'app/game.services/entityservice';
 import { BattleService } from 'app/game.services/battleservice';
+import { BattleTurn } from 'app/game.utils/battleturn';
 
 @Component({
   selector: 'app-battlemodule',
@@ -42,21 +43,17 @@ export class BattlemoduleComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.char = this.characterService.getCharacterByName('Regrell');
-    this.mons = this.characterService.getMonsterByName('Lich');
+    this.char = this.characterService.getCharacterByName('Dalvert');
+    this.mons = this.characterService.getMonsterByName('Boogeyman');
   }
 
-  startRound(playerTurnAction: { action: string, spell: string, quickSpell: string }) {
+  startRound(playerTurnAction: BattleTurn) {
     this.roundNumber++;
 
     const entitiesInBattle: GameEntity[] = [this.char, this.mons];
+    playerTurnAction.target = this.mons;
 
-    this.battleService.startRound(this.roundNumber, entitiesInBattle, {
-      action: playerTurnAction.action,
-      spell: playerTurnAction.spell,
-      quickSpell: playerTurnAction.quickSpell,
-      target: this.mons
-    });
+    this.battleService.startRound(this.roundNumber, entitiesInBattle, playerTurnAction);
 
   }
 }

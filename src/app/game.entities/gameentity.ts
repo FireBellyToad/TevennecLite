@@ -9,7 +9,8 @@ import { WeaponType } from 'app/game.enums/weapontypes';
 import { Castable } from 'app/game.spells/castable';
 import { SpellService } from 'app/game.services/spellservice';
 import { Condition } from 'app/game.enums/conditions';
-import { Power } from 'app/game.enums/power';
+import { Power } from 'app/game.enums/powers';
+import { AuraEffect } from 'app/game.enums/auraeffects';
 
 export abstract class GameEntity {
 
@@ -57,6 +58,7 @@ export abstract class GameEntity {
     spells: Castable[];
 
     readonly conditions = new Map<Condition, number>();
+    readonly activeAuras = new Map<AuraEffect, number>();
 
     constructor(name: string, tou: number, agi: number, min: number, wil: number, level: number,
         role: Role, talent: Talent, spells: Castable[]) {
@@ -169,7 +171,8 @@ export abstract class GameEntity {
     }
 
     hasResistance(damageType: DamageType): boolean {
-        return this.resistances.includes(damageType);
+        return (this.activeAuras.has(AuraEffect.Fortitudo) && damageType !== DamageType.Light) ||
+            this.resistances.includes(damageType);
     }
 
     hasImmunity(damageType: DamageType): boolean {
@@ -177,7 +180,13 @@ export abstract class GameEntity {
     }
 
     // HP
-    protected abstract addHpIncrements();
+    protected addHpIncrements() {
+
+        for (let lev = 0; lev < this.level - 1; lev++) {
+            this.levelupHpIncrements.push(new StandardDiceRoll(1, 4, 0).totalResult);
+        }
+
+    }
     protected calculateHP() {
 
         this.maxHp = 8 + this.tou * 2;
@@ -186,7 +195,6 @@ export abstract class GameEntity {
 
             this.maxHp += increment;
         }
-
         this.actualHP = this.maxHp;
     }
 
@@ -194,15 +202,15 @@ export abstract class GameEntity {
         this.actualHP = Math.min(this.maxHp, this.actualHP + value);
     }
 
-    takeDamageFromRoll(roll: DamageRoll): number {
+    takeDamage(value: number, damageType: DamageType): number {
 
-        let totalDamage = roll.damageRoll.totalResult
+        let totalDamage = value;
 
-        if (this.hasImmunity(roll.damageType)) {
+        if (this.hasImmunity(damageType)) {
             return 0;
-        } else if (this.hasResistance(roll.damageType)) {
+        } else if (this.hasResistance(damageType)) {
             totalDamage = Math.max(0, totalDamage - 3);
-        } else if (this.hasVulnerability(roll.damageType)) {
+        } else if (this.hasVulnerability(damageType)) {
             totalDamage += 3;
         }
 
@@ -213,6 +221,11 @@ export abstract class GameEntity {
         }
 
         return totalDamage;
+    }
+
+    takeDamageFromRoll(roll: DamageRoll): number {
+
+        return this.takeDamage(roll.damageRoll.totalResult, roll.damageType);
     }
 
 
@@ -251,17 +264,25 @@ export abstract class GameEntity {
     }
 
     // Reserve slots for Aura spells. Returns false if can't cast
-    reserveEnergySlots(toReserve: number): boolean {
+    canReserveEnergySlots(toReserve: number): boolean {
 
         if (this.energySlots < toReserve || this.availableSlots < toReserve) {
             return false;
         }
 
-        this.occupiedSlots = Math.max(0, this.availableSlots - toReserve);
-
-        this.availableSlots -= this.energySlots - this.occupiedSlots;
-
         return true;
+    }
+
+    recalculateOccupiedSlots(alterAvailableSlots = false) {
+        this.availableSlots = alterAvailableSlots ? this.availableSlots + this.occupiedSlots : this.availableSlots;
+        this.occupiedSlots = this.talent === Talent.Luminous ? 1 : 0;
+        this.activeAuras.forEach((value: number) => this.occupiedSlots += value);
+        this.availableSlots = alterAvailableSlots ? Math.max(0, this.availableSlots - this.occupiedSlots) : this.availableSlots;
+    }
+
+    releaseEnergySlots(toRelease: number) {
+
+        this.occupiedSlots = Math.max(0, this.occupiedSlots - toRelease);
     }
 
     // Regain Will/2 slots per round
@@ -271,7 +292,7 @@ export abstract class GameEntity {
     }
 
     // Take Condition
-    takeCondition(condition: Condition, rounds = 0) {
+    takeCondition(condition: Condition, rounds = 0): boolean {
 
         // Add new condition or decrease current one
         if (this.conditions.has(condition) && rounds <= 0) {
@@ -282,7 +303,7 @@ export abstract class GameEntity {
 
         switch (condition) {
             case Condition.Bleeding: {
-                this.actualHP--;
+                this.takeDamageFromRoll(new DamageRoll(1, 6, 0, DamageType.Untyped))
                 break;
             }
             case Condition.Frightened: {
@@ -306,6 +327,8 @@ export abstract class GameEntity {
             }
 
         }
+
+        return true;
     }
 
     clearPenalties() {

@@ -1,6 +1,6 @@
 import { Item } from 'app/game.items/item';
 import { WeaponType } from 'app/game.enums/weapontypes';
-import { Power } from 'app/game.enums/power';
+import { Power } from 'app/game.enums/powers';
 import { DamageType } from 'app/game.utils/damagetypes';
 
 export class Weapon extends Item {

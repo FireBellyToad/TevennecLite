@@ -5,7 +5,7 @@ import { StandardDiceRoll } from 'app/game.dicerollers/standarddiceroll';
 import { DamageRoll } from 'app/game.utils/damageroll';
 import { Armor } from 'app/game.items/armor';
 import { Weapon } from 'app/game.items/weapon';
-import { Power } from 'app/game.enums/power';
+import { Power } from 'app/game.enums/powers';
 import { Role } from 'app/game.enums/roles';
 import { Talent } from 'app/game.enums/talents';
 import { WeaponType } from 'app/game.enums/weapontypes';
@@ -16,16 +16,20 @@ import { Shield } from 'app/game.items/shield';
 import { SpellService } from 'app/game.services/spellservice';
 import { Castable } from 'app/game.spells/castable';
 import { Condition } from 'app/game.enums/conditions';
+import { AuraEffect } from 'app/game.enums/auraeffects';
+import { Ring } from 'app/game.items/ring';
 
 export class Character extends GameEntity {
 
     armor: Armor = null;
     shield: Shield = null;
+    leftRing: Ring = null;
+    rightRing: Ring = null;
     armorCompetences: ArmorType[] = [];
 
     constructor(name: string, tou: number, agi: number, min: number, wil: number, level: number,
         role: Role, talent: Talent, weapon: Weapon = null, armor: Armor = null,
-        shield: Shield = null, spells: Castable[] = []) {
+        shield: Shield = null, leftRing: Ring = null, rightRing: Ring = null, spells: Castable[] = []) {
 
         super(name, tou, agi, min, wil, level, role, talent, spells);
 
@@ -35,6 +39,8 @@ export class Character extends GameEntity {
             this.maxHp -= 4;
         }
 
+        this.leftRing = leftRing;
+        this.rightRing = rightRing;
 
         if (this.role === Role.Fighter) {
 
@@ -56,8 +62,8 @@ export class Character extends GameEntity {
             this.availableSlots = this.energySlots;
         }
 
-        // Templar Talent Feature
-        if (this.talent === Talent.Templar) {
+        // Fighter Role Feature or Templar Talent Feature
+        if (this.role === Role.Fighter || this.talent === Talent.Templar) {
             this.maxHp += 3;
             this.actualHP += 3;
         }
@@ -93,6 +99,12 @@ export class Character extends GameEntity {
             this.weaponCompetences.push(WeaponType.Piercing);
         }
 
+
+        // Fighter Role Feature
+        if (this.role === Role.Fighter) {
+            this.maxHp += Math.floor(this.level / 2);
+            this.actualHP = this.maxHp;
+        }
     }
 
     getATK(): number {
@@ -107,8 +119,15 @@ export class Character extends GameEntity {
         }
 
         // Magic Weapon bonus
-        if (this.weapon.powers.has(Power.Precise)) {
-            magicBonus = this.weapon.powers.get(Power.Precise);
+        if (this.weapon.powers.has(Power.Precise) || this.weapon.powers.has(Power.OfPrecision)) {
+            magicBonus += this.weapon.powers.get(Power.Precise);
+        }
+
+        // Magic Ring bonus
+        if (this.leftRing && this.leftRing.powers.has(Power.OfPrecision)) {
+            magicBonus += this.leftRing.powers.get(Power.OfPrecision);
+        } else if (this.rightRing && this.rightRing.powers.has(Power.OfPrecision)) {
+            magicBonus += this.rightRing.powers.get(Power.OfPrecision);
         }
 
         return competence + Math.floor(this.getAgi() / 2) + magicBonus - this.atkPenalty;
@@ -117,11 +136,11 @@ export class Character extends GameEntity {
     getAttackRoll(): DiceRoll {
 
         // Champion Figher Class Feature
-        if (this.role === Role.Fighter && this.level === 10) {
+        if (this.role === Role.Fighter && this.level >= 8) {
             this.lastAttackRoll = new AdvantageDiceRoll(1, 20, this.getATK());
+        }else{
+            this.lastAttackRoll = new StandardDiceRoll(1, 20, this.getATK());
         }
-
-        this.lastAttackRoll = new StandardDiceRoll(1, 20, this.getATK());
 
         return this.lastAttackRoll;
     }
@@ -130,16 +149,21 @@ export class Character extends GameEntity {
 
         let totalModifier = Math.floor(this.getTou() / 2) - this.dmgPenalty;
 
-        // Fighter Lethal class feature
-        if (this.role === Role.Fighter && this.level >= 4 &&
-            this.weapon.types.every(
-                (value: WeaponType): boolean => this.weaponCompetences.includes(value))) {
+        // Fighter Lethal Role feature
+        if (this.role === Role.Fighter && this.level >= 2 &&
+            this.weapon.types.every((value: WeaponType): boolean => this.weaponCompetences.includes(value))) {
 
             totalModifier += 3;
         }
 
+        // Duelist Talent  feature
         if (this.talent === Talent.Duelist && this.weapon.types.includes(WeaponType.OneHanded)) {
             totalModifier += 2;
+        }
+
+        // Irancudia Aura Effect
+        if (this.activeAuras.has(AuraEffect.Iracundia)) {
+            totalModifier += 3;
         }
 
         // Weapon Magical Damage Bonus
@@ -170,7 +194,8 @@ export class Character extends GameEntity {
             isCritical = this.lastAttackRoll.naturalResults[0] + this.getMin() >= 20;
         }
 
-        return new DamageRoll(1, this.weapon.weaponDice, totalModifier, this.weapon.damageType, isCritical);
+        const damageType = this.activeAuras.has(AuraEffect.Arma) ? DamageType.Light : this.weapon.damageType;
+        return new DamageRoll(1, this.weapon.weaponDice, totalModifier, damageType, isCritical);
     }
 
     public getDEF(): number {
@@ -179,7 +204,11 @@ export class Character extends GameEntity {
         const maxAGi = this.armor.isHeavy() ? Math.min(2, this.getAgi()) : this.getAgi();
 
         // Spells Modifier
-        const spellsModifier = 0
+        let spellsModifier = 0
+
+        if (this.activeAuras.has(AuraEffect.Scutum)) {
+            spellsModifier = 3;
+        }
 
         return 8 + maxAGi + this.armor.getArmorDefBonus() + spellsModifier - this.defPenalty;
     }
@@ -193,28 +222,11 @@ export class Character extends GameEntity {
         }
 
         // Check for Consecratio Spell Effect
-        // if ( this.activeAuras.hasAura( Spells.Consecratio ) ) {
-        //     return new AdvantageDiceRoll( 1, 20, totalModifier );
-        // }else{
-        return new StandardDiceRoll(1, 20, totalModifier);
-        // }
-    }
-
-    protected addHpIncrements() {
-
-        let roll: DiceRoll = null;
-
-        for (let lev = 0; lev < this.level - 1; lev++) {
-
-            if (this.role === Role.Fighter && this.level >= 2) {
-                roll = new AdvantageDiceRoll(1, 4, 0);
-            } else {
-                roll = new StandardDiceRoll(1, 4, 0);
-            }
-
-            this.levelupHpIncrements.push(roll.totalResult);
+        if (this.activeAuras.has(AuraEffect.Consecratio)) {
+            return new AdvantageDiceRoll(1, 20, totalModifier);
+        } else {
+            return new StandardDiceRoll(1, 20, totalModifier);
         }
-
     }
 
     hasDoubleAttack(): boolean {
@@ -235,4 +247,5 @@ export class Character extends GameEntity {
     canBeBlocked(): boolean {
         return true;
     }
+
 }

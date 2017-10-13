@@ -6,7 +6,7 @@
         <button 
           class="btn btn-success"
           [disabled]="buttonDisabled"
-          (click) = "startBattleRound(actionToTake.value,spellToCast.value,quickSpellToCast.value)">Start round</button>
+          (click) = "startBattleRound(actionToTake.value,spellToCast.value,quickSpellToCast.value,auraToRelease.value)">Start round</button>
         <button 
           class="btn btn-danger"
           [disabled]="buttonDisabled"
@@ -24,6 +24,15 @@
                   <option value = "atk">Attack</option>
                   <option *ngIf= "spellList.length > 0"  value = "cas">Cast a spell</option>
               </select>
+              <label>Select Aura to release</label>   
+              <select class="form-control" #auraToRelease>
+                <option></option>
+                <option 
+                  *ngFor=" let aura of activeAuraList()"
+                  [value] = "aura">
+                  {{ getAuraName(aura)  }}
+                </option>
+              </select>
             </div>
           </div>
      
@@ -40,8 +49,9 @@
                 </select>
                 <label>Select Quick Spell</label>
                 <select class="form-control" #quickSpellToCast>
+                  <option></option>
                   <option 
-                    *ngFor=" let spell of quickSpellList"
+                    *ngFor=" let spell of quickSpellList()"
                     [value] = "spell">
                     {{ spell }}
                   </option>

@@ -2,8 +2,9 @@ import { Weapon } from 'app/game.items/weapon';
 import { WeaponType } from 'app/game.enums/weapontypes';
 import { Armor } from 'app/game.items/armor';
 import { ArmorType } from 'app/game.enums/armortypes';
-import { Power } from 'app/game.enums/power';
+import { Power } from 'app/game.enums/powers';
 import { Shield } from 'app/game.items/shield';
+import { Ring } from 'app/game.items/ring';
 
 export class ItemFactory {
 
@@ -43,5 +44,12 @@ export class ItemFactory {
 
     static getMagicFullPlate(powers?: Map<Power, number>) {
         return new Armor('Full plate', 8, ArmorType.Heavy, powers);
+    }
+
+    static getRingOfPrecision() {
+
+        const powers = new Map<Power, number>();
+        powers.set(Power.OfPrecision, 2);
+        return new Ring(powers);
     }
 }

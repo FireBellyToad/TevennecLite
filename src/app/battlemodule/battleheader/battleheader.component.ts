@@ -1,6 +1,8 @@
-import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
+import { Component, OnInit, DoCheck, EventEmitter, Output, Input } from '@angular/core';
 import { EntitiesService } from 'app/game.services/entityservice';
 import { Character } from 'app/game.entities/character';
+import { BattleTurn } from 'app/game.utils/battleturn';
+import { AuraEffect } from 'app/game.enums/auraeffects';
 
 @Component({
   selector: 'app-battleheader',
@@ -8,12 +10,10 @@ import { Character } from 'app/game.entities/character';
   styleUrls: ['./battleheader.component.css']
 })
 export class BattleheaderComponent implements OnInit {
-
   @Input() buttonDisabled = false;
   @Input() currentChar: Character;
-  @Output() startRound = new EventEmitter<{ action: string, spell: string, quickSpell: string }>();
+  @Output() startRound = new EventEmitter<BattleTurn>();
   spellList: string[];
-  quickSpellList: string[] = ['']; // Empty voice for no cast
   characterService: EntitiesService;
   numberOfResets = 0;
 
@@ -23,18 +23,37 @@ export class BattleheaderComponent implements OnInit {
 
   ngOnInit() {
     this.spellList = Array.from(this.currentChar.spellsKnown.keys());
+  }
+
+  quickSpellList() {
     let quickSpellTemp = Array.from(this.currentChar.spellsKnown.values());
-    quickSpellTemp = quickSpellTemp.filter(sp => sp.spellLevel + 2 <= this.currentChar.getMin())
+    const delta = this.currentChar.activeAuras.has(AuraEffect.Celeritas) ? 2 : 3;
+    quickSpellTemp = quickSpellTemp.filter(sp => sp.spellLevel + delta <= this.currentChar.getMin())
+    const quickSpellList = [];
 
     for (const spell of quickSpellTemp) {
 
-      this.quickSpellList.push(spell.name);
+      quickSpellList.push(spell.name);
     }
+    return quickSpellList;
   }
 
+  activeAuraList() {
+    const auraToReleaseList = []
 
-  startBattleRound(action: string, spell: string, quickSpell: string) {
-    this.startRound.emit({ action: action, spell: spell, quickSpell: quickSpell });
+    this.currentChar.activeAuras.forEach((value: number, aura: AuraEffect) => {
+      auraToReleaseList.push(aura);
+    });
+
+    return auraToReleaseList;
+  }
+
+  getAuraName(aura: AuraEffect): string {
+    return AuraEffect[aura];
+  }
+
+  startBattleRound(action: string, spell: string, quickSpell: string, auraToRelease: string) {
+    this.startRound.emit({ action: action, spell: spell, quickSpell: quickSpell, auraToRelease: auraToRelease, target: undefined });
   }
 
   resetChar() {

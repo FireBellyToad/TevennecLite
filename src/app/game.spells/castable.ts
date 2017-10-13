@@ -7,7 +7,6 @@ export interface Castable {
     name: string
     slotExpendend: number;
     spellLevel: number;
-    isAura: boolean;
     isMonsterSpell: boolean;
     cast: ( targets: GameEntity[], caster: GameEntity )  => void;
 

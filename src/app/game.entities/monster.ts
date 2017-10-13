@@ -103,7 +103,7 @@ export class Monster extends GameEntity {
             isCritical = this.lastAttackRoll.naturalResults[0] + this.min >= 20;
         }
 
-        return new DamageRoll(1, this.weapon.weaponDice, Math.floor(this.tou / 2 ) - this.dmgPenalty, type, isCritical);
+        return new DamageRoll(1, this.weapon.weaponDice, Math.floor(this.tou / 2) - this.dmgPenalty, type, isCritical);
     }
 
     getDEF(): number {
@@ -118,16 +118,16 @@ export class Monster extends GameEntity {
     }
 
     protected getSavingThrow(attribute: number) {
-        return new StandardDiceRoll(1, 20, attribute);
-    }
+        let levelModifier = 0;
 
-    protected addHpIncrements() {
-
-        for (let lev = 0; lev < this.level - 1; lev++) {
-            this.levelupHpIncrements.push(new StandardDiceRoll(1, 4, 0).totalResult);
+        // Brute and Boss Role Feature
+        if (this.role === Role.Brute || this.role === Role.Boss)  {
+            levelModifier += Math.floor(this.level / 5);
         }
 
+        return new StandardDiceRoll(1, 20, attribute + levelModifier);
     }
+
 
     hasDoubleAttack(): boolean {
         return !this.conditions.has(Condition.Maimed) && this.talent === Talent.Quick;
@@ -140,4 +140,15 @@ export class Monster extends GameEntity {
     canBeBlocked(): boolean {
         return this.talent !== Talent.Big;
     }
+
+    takeCondition(condition: Condition, rounds = 0, overrideUndeadImmunity = false): boolean {
+        // Undeads are Immune to conditions, but sometimes this condition could be overridden
+        if ((this.monsterType !== MonsterType.LesserUndead &&
+            this.monsterType !== MonsterType.MajorUndead) || overrideUndeadImmunity) {
+            return super.takeCondition(condition, rounds);
+        }
+
+        return false;
+    }
+
 }

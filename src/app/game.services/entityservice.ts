@@ -8,7 +8,7 @@ import { ItemFactory } from 'app/game.items/itemfactory';
 import { WeaponType } from 'app/game.enums/weapontypes';
 import { Weapon } from 'app/game.items/weapon';
 import { MonsterType } from 'app/game.enums/monstertype';
-import { Power } from 'app/game.enums/power';
+import { Power } from 'app/game.enums/powers';
 
 @Injectable()
 export class EntitiesService {
@@ -24,12 +24,13 @@ export class EntitiesService {
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Exemplar,
                 ItemFactory.PITCHFORK),
             new Character('Regrell', 4, 3, 3, 1, 10, Role.Fighter, Talent.Exemplar,
-                ItemFactory.getMagicGreatSword(), ItemFactory.FULL_PLATE, null, [this.spellService.getSpellByName('Sagitta'),
-                this.spellService.getSpellByName('Medico')]),
+                ItemFactory.getMagicGreatSword(), ItemFactory.FULL_PLATE, null, ItemFactory.getRingOfPrecision(), null,
+                this.spellService.getCharacterSpells(2)),
             new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
-                ItemFactory.getMagicMace(), null, ItemFactory.SHIELD, this.spellService.getCharacterSpells()),
+                ItemFactory.getMagicMace(), ItemFactory.FULL_PLATE, ItemFactory.SHIELD, ItemFactory.getRingOfPrecision(), null,
+                 this.spellService.getCharacterSpells()),
             new Character('Lissandra', 0, 0, 4, 4, 10, Role.Spellcaster, Talent.Luminous,
-                ItemFactory.getMagicMace(), ItemFactory.CHAIN_MAIL, ItemFactory.SHIELD, this.spellService.getCharacterSpells())
+                ItemFactory.getMagicMace(), ItemFactory.CHAIN_MAIL, ItemFactory.SHIELD, null, null, this.spellService.getCharacterSpells())
         ];
         this.mons = [
             new Monster('Lesser Daemon', 0, 1, 2, 1, 2,
@@ -72,7 +73,8 @@ export class EntitiesService {
             new Monster('Boogeyman', 6, 6, 4, 2, 10,
                 Role.Brute, Talent.Quick, MonsterType.MajorFoul,
                 new Weapon('Claw', 1, 8, [WeaponType.OneHanded, WeaponType.Slashing]),
-                [this.spellService.getSpellByName('Fear'), this.spellService.getSpellByName('Cause Serious Wounds')])];
+                [this.spellService.getSpellByName('Fear'), this.spellService.getSpellByName('Cause Serious Wounds'),
+                this.spellService.getSpellByName('Suppress Aura')])];
     }
 
     getCharacterByName(name: string) {

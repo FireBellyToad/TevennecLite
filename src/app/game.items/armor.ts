@@ -1,6 +1,6 @@
 import { Item } from 'app/game.items/item';
 import { ArmorType } from 'app/game.enums/armortypes';
-import { Power } from 'app/game.enums/power';
+import { Power } from 'app/game.enums/powers';
 
 export class Armor extends Item {
 

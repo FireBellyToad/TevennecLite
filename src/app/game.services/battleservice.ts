@@ -14,6 +14,9 @@ import { Role } from 'app/game.enums/roles';
 import { WeaponType } from 'app/game.enums/weapontypes';
 import { SavingThrow } from 'app/game.utils/savingthrow';
 import { DamageType } from 'app/game.utils/damagetypes';
+import { AuraSpell } from 'app/game.spells/auraspell';
+import { BattleTurn } from 'app/game.utils/battleturn';
+import { AuraEffect } from 'app/game.enums/auraeffects';
 
 @Injectable()
 export class BattleService {
@@ -31,28 +34,37 @@ export class BattleService {
 
 
     // Starts round
-    startRound(roundNumber, entitiesInBattle: GameEntity[],
-        playerTurnAction: { action: string, spell: string, quickSpell: string, target: GameEntity }) {
+    startRound(roundNumber, entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
         this.roundFinished = false;
         // Cleans log
         this.logger.addEntry('Round ' + roundNumber + ' Start', LogEntry.COLOR_GREEN);
 
-        this.battleTimer = setInterval(() => { this.manageConditions(entitiesInBattle, playerTurnAction) }, 1500);
+        this.battleTimer = setInterval(() => { this.manageRoundStartEffect(entitiesInBattle, playerTurnAction) }, 1500);
 
     }
 
     // Manage entity conditions
-    manageConditions(entitiesInBattle: GameEntity[],
-        playerTurnAction: { action: string, spell: string, quickSpell: string, target: GameEntity }) {
+    manageRoundStartEffect(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
 
 
         for (const entity of entitiesInBattle) {
             // Clean all penalties
             entity.clearPenalties();
 
-            for (const condition of Array.from(entity.conditions.keys())) {
+            // Conditions
+            entity.conditions.forEach((value: number, condition: Condition) => {
                 entity.takeCondition(condition);
-            }
+            });
+
+            // Auras
+            entity.activeAuras.forEach((value: number, aura: AuraEffect) => {
+                if (aura === AuraEffect.Iracundia) {
+                    entity.takeDamage(4, DamageType.Untyped)
+                }
+                if (aura === AuraEffect.Impulsus) {
+                    entity.gainHP(entity.getWil())
+                }
+            })
         }
 
         clearInterval(this.battleTimer);
@@ -60,8 +72,7 @@ export class BattleService {
     }
 
     // Rolls initiative for all the entities and sorts the from higher to lower
-    rollRoundInitiative(entitiesInBattle: GameEntity[],
-        playerTurnAction: { action: string, spell: string, quickSpell: string, target: GameEntity }) {
+    rollRoundInitiative(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
 
         for (const entity of entitiesInBattle) {
 
@@ -87,9 +98,9 @@ export class BattleService {
 
     // Defines turn
     // tslint:disable-next-line:max-line-length
-    doTurnsDefinition(entitiesInBattle: GameEntity[], playerTurnAction: { action: string, spell: string, quickSpell: string, target: GameEntity }) {
+    doTurnsDefinition(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
 
-        const turnActions = new Map<GameEntity, { action: string, spell: string, quickSpell: string, target: GameEntity }>();
+        const turnActions = new Map<GameEntity, BattleTurn>();
         const monsterTargets = entitiesInBattle.filter(en => en instanceof Character);
 
         for (const entity of entitiesInBattle) {
@@ -108,12 +119,12 @@ export class BattleService {
     }
 
     // Resolve Turns actions
-    doResolveTurns(turnActions: Map<GameEntity, { action: string, spell: string, quickSpell: string, target: GameEntity }>) {
+    doResolveTurns(turnActions: Map<GameEntity, BattleTurn>) {
 
         const entitiesHit: { target: GameEntity, attacker: GameEntity, spells: Castable, damage: DamageRoll, processed: boolean }[] = [];
 
         // Attacking or Casting
-        for (const entity of Array.from(turnActions.keys())) {
+        turnActions.forEach((turn: BattleTurn, entity: GameEntity) => {
 
             // Cleans the hit json object array
 
@@ -128,7 +139,17 @@ export class BattleService {
                     this.logger.addDamageEntry(entity.name, 'confusion', dmg.toString());
 
                 } else {
-                    const turn = turnActions.get(entity);
+
+                    // Release the selected aura
+                    if (turn.auraToRelease !== '') {
+                        const aura = entity.activeAuras.forEach((slots: number, au: AuraEffect) => {
+                            if (au.toString() === turn.auraToRelease) {
+
+                                entity.releaseEnergySlots(slots);
+                                entity.activeAuras.delete(au);
+                            }
+                        })
+                    }
 
                     switch (turn.action) {
                         case 'atk': {
@@ -159,7 +180,7 @@ export class BattleService {
                 }
             }
 
-        }
+        });
         clearInterval(this.battleTimer);
         this.battleTimer = setInterval(() => { this.endRound(turnActions) }, 1500);
     }
@@ -247,11 +268,17 @@ export class BattleService {
     }
 
     // Spells Routine
-    private spellRoutine(entity: GameEntity, turn: { action: string, spell: string, quickSpell: string, target: GameEntity },
+    private spellRoutine(entity: GameEntity, turn: BattleTurn,
         entitiesHit: { target: GameEntity, attacker: GameEntity, damage: DamageRoll }[], isQuickSpellCasting = false) {
 
         const spellTocast = isQuickSpellCasting ? entity.spellsKnown.get(turn.quickSpell) : entity.spellsKnown.get(turn.spell);
-        let canCast = entity.spendEnergySlots(spellTocast.slotExpendend);
+        let canCast = false;
+
+        if (spellTocast instanceof AuraSpell) {
+            canCast = entity.canReserveEnergySlots(spellTocast.slotExpendend);
+        } else {
+            canCast = entity.spendEnergySlots(spellTocast.slotExpendend);
+        }
 
         // For each time the caster has been hit, he tries to concentrate
         if (canCast) {
@@ -296,32 +323,65 @@ export class BattleService {
         }
 
         // Fighter Role Feature
-        if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 6) {
-            if (hitEntry.attacker.weapon.types.includes(WeaponType.Bludgeoning)) {
+        if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 4) {
+            if (hitEntry.attacker.weapon.types.includes(WeaponType.Slashing) && hitEntry.damage.isCritical) {
+
+                if (!hitEntry.target.takeCondition(Condition.Maimed, -1)) {
+                    this.logger.addEntry(hitEntry.target.name + ' cannot be Maimed');
+                }
+                if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 10) {
+
+                    const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
+                        finalDamage,
+                        false,
+                        hitEntry.target.name,
+                        this.logger);
+
+                    if (!savingThrow.isSuccessful()) {
+
+                        if (!hitEntry.target.takeCondition(Condition.Stunned, 1)) {
+                            this.logger.addEntry(hitEntry.target.name + ' cannot be Stunned');
+                        }
+                    }
+                }
+            } else if (hitEntry.attacker.weapon.types.includes(WeaponType.Bludgeoning)) {
+
+                let bonus = 0;
+                if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 10) {
+                    bonus = 2;
+                }
+
                 const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
-                    finalDamage,
+                    finalDamage + bonus,
                     false,
                     hitEntry.target.name,
                     this.logger);
 
                 if (!savingThrow.isSuccessful()) {
 
-                    hitEntry.target.takeCondition(Condition.Stunned, 1);
+                    if (!hitEntry.target.takeCondition(Condition.Stunned, 1)) {
+                        this.logger.addEntry(hitEntry.target.name + ' cannot be Stunned');
+                    }
                 }
-            } else if (hitEntry.attacker.weapon.types.includes(WeaponType.Slashing) && hitEntry.damage.isCritical) {
-                hitEntry.target.takeCondition(Condition.Maimed, -1);
             } else if (hitEntry.attacker.weapon.types.includes(WeaponType.Piercing) && hitEntry.damage.isCritical) {
-                hitEntry.target.takeCondition(Condition.Bleeding, 2);
+                let time = 2;
+
+                if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 10) {
+                    time = 4;
+                }
+
+                if (!hitEntry.target.takeCondition(Condition.Bleeding, time)) {
+                    this.logger.addEntry(hitEntry.target.name + ' cannot be Bleeded');
+                }
             }
         }
     }
 
     // End Round
-    private endRound(turnActions: Map<GameEntity, { action: string, spell: string, target: GameEntity }>) {
+    private endRound(turnActions: Map<GameEntity, BattleTurn>) {
 
         // The entities that have cast a spell in the previous round now regains slots
-        for (const entity of Array.from(this.mustRegainSlots.keys())) {
-            const value = this.mustRegainSlots.get(entity);
+        this.mustRegainSlots.forEach((value: number, entity: GameEntity) => {
             if (value === 1) {
                 this.mustRegainSlots.delete(entity)
                 entity.regainEnergySlot();
@@ -329,19 +389,22 @@ export class BattleService {
             } else {
                 this.mustRegainSlots.set(entity, value - 1);
             }
-        }
+        })
 
-        for (const entity of Array.from(turnActions.keys())) {
+        turnActions.forEach((turn: BattleTurn, entity: GameEntity) => {
 
-            // Clean all finished conditions
-            for (const condition of Array.from(entity.conditions.keys())) {
-                if (condition !== Condition.Dead && entity.conditions.get(condition) === 0) {
+            // Clean all ended conditions.
+            entity.conditions.forEach((rounds: number, condition: Condition) => {
+                if (condition !== Condition.Dead && rounds === 0) {
+                    // If has Illness, Dies
+                    if (condition === Condition.Ill) {
+                        entity.takeCondition(Condition.Dead);
+                    }
                     entity.conditions.delete(condition);
                 }
-            }
+            });
 
             // The entities that have spent or lost energy slots this round will regain slots in the next one
-            const turn = turnActions.get(entity);
             if (!entity.conditions.has(Condition.Dead) && entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
                 // Ospitaler Talent feature
                 if (entity.talent === Talent.Ospitaler) {
@@ -350,19 +413,19 @@ export class BattleService {
                     this.mustRegainSlots.set(entity, 1);
                 }
             }
-        }
+        });
         clearInterval(this.battleTimer);
         this.roundFinished = true;
     }
 
     // AI for Monsters
     // tslint:disable-next-line:max-line-length
-    private getMonsterAction(entity: GameEntity, targets: GameEntity[]): { action: string, spell: string, quickSpell: string, target: GameEntity } {
+    private getMonsterAction(entity: GameEntity, targets: GameEntity[]): BattleTurn {
 
 
         // Dumb monsters, Lethal monsters or spell less just attack
         if (entity.getMin() < 2 || entity.talent === Talent.Lethal || entity.spellsKnown.size === 0) {
-            return { action: 'atk', spell: '', quickSpell: '', target: targets[0] };
+            return { action: 'atk', spell: '', quickSpell: '', auraToRelease: '', target: targets[0] };
         } else {
 
             let quickSpellMemo = '';
@@ -374,37 +437,47 @@ export class BattleService {
                 if (entity.role === Role.Boss || entity.role === Role.Sorcerer) {
                     quickSpellMemo = 'Cure Wounds';
                 } else {
-                    return { action: 'cas', spell: 'Cure Wounds', quickSpell: '', target: entity }
+                    return { action: 'cas', spell: 'Cure Wounds', quickSpell: '', auraToRelease: '', target: entity }
                 }
 
             }
 
-            const spellList = Array.from(entity.spellsKnown.keys());
             // If the monster could cast a non-cure spell, he will do, or else he will attack
-            for (const spellChosen of spellList) {
-                if ((entity.availableSlots >= entity.spellsKnown.get(spellChosen).slotExpendend) &&
-                    (spellChosen !== 'Cure Wounds' && spellChosen !== 'Medico')) {
+            let toDo: BattleTurn;
+            entity.spellsKnown.forEach((spell: Castable) => {
+                if ((entity.availableSlots >= spell.slotExpendend) &&
+                    (spell.name !== 'Cure Wounds' && spell.name !== 'Medico')) {
 
                     // If is Sorcerer or Boss and is a 1st level spell, he will quickcast it
-                    if ((entity.role === Role.Boss || entity.role === Role.Sorcerer) &&
-                        entity.spellsKnown.get(spellChosen).spellLevel === 1) {
+                    if ((entity.role === Role.Boss || entity.role === Role.Sorcerer) && spell.spellLevel === 1) {
 
-                        quickSpellMemo = spellChosen;
+                        quickSpellMemo = spell.name;
 
                     } else {
                         // Chose one spell randomly from the list, or the last one if no other has been chosen
-                        if (spellList.lastIndexOf(spellChosen) === spellList.length - 1 ||
-                            (new StandardDiceRoll(1, 3)).totalResult !== 1) {
+                        if ((new StandardDiceRoll(1, 3)).totalResult !== 1) {
 
-                            return { action: 'cas', spell: spellChosen, quickSpell: quickSpellMemo, target: targets[0] }
+                            toDo = {
+                                action: 'cas',
+                                spell: spell.name,
+                                quickSpell: quickSpellMemo,
+                                auraToRelease: '',
+                                target: targets[0]
+                            }
+                            return;
                         }
                     }
 
                 }
-            }
+
+            });
 
             // Just attack
-            return { action: 'atk', spell: '', quickSpell: quickSpellMemo, target: targets[0] };
+            if (toDo && toDo.action === 'cas') {
+                return toDo
+            } else {
+                return { action: 'atk', spell: '', quickSpell: quickSpellMemo, auraToRelease: '', target: targets[0] };
+            }
 
         }
     }

@@ -23,7 +23,7 @@
           </div>
         </div>
 
-        <div class="col-md-5">
+        <div class="col-md-6">
           <strong>Statistics: </strong>
           <div class="row" style="padding-top: 5px">
             <div class="col-md-12">
@@ -58,16 +58,16 @@
               <div class="row">
                 <div class="col-md-12" style="color: gray">
                   <strong *ngIf="entity.occupiedSlots >= 1">-</strong>
-                  <strong *ngIf="entity.availableSlots >= 1">O</strong>
                   <strong *ngIf="entity.occupiedSlots >= 2">-</strong>
-                  <strong *ngIf="entity.availableSlots >= 2">O</strong>
                   <strong *ngIf="entity.occupiedSlots >= 3">-</strong>
-                  <strong *ngIf="entity.availableSlots >= 3">O</strong>
                   <strong *ngIf="entity.occupiedSlots >= 4">-</strong>
-                  <strong *ngIf="entity.availableSlots >= 4">O</strong>
                   <strong *ngIf="entity.occupiedSlots >= 5">-</strong>
-                  <strong *ngIf="entity.availableSlots >= 5">O</strong>
                   <strong *ngIf="entity.occupiedSlots >= 6">-</strong>
+                  <strong *ngIf="entity.availableSlots >= 1">O</strong>
+                  <strong *ngIf="entity.availableSlots >= 2">O</strong>
+                  <strong *ngIf="entity.availableSlots >= 3">O</strong>
+                  <strong *ngIf="entity.availableSlots >= 4">O</strong>
+                  <strong *ngIf="entity.availableSlots >= 5">O</strong>
                   <strong *ngIf="entity.availableSlots >= 6">O</strong>
                 </div>
               </div>
@@ -75,7 +75,7 @@
           </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
           <!-- Conditions -->
           <strong>Conditions: </strong>
           <p *ngFor=" let cond of getConditionList()" [ngStyle]="{ color: red }">
