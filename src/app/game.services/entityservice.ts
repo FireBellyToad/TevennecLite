@@ -24,11 +24,14 @@ export class EntitiesService {
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Exemplar,
                 ItemFactory.PITCHFORK),
             new Character('Regrell', 4, 3, 3, 1, 10, Role.Fighter, Talent.Exemplar,
-                ItemFactory.getMagicGreatSword(), ItemFactory.FULL_PLATE, null, ItemFactory.getRingOfPrecision(), null,
+                ItemFactory.getMagicGreatSword(), ItemFactory.FULL_PLATE, null, ItemFactory.getRing(Power.OfPrecision, 2), null,
                 this.spellService.getCharacterSpells(2)),
+            new Character('Sir Matheus', 3, 2, 3, 0, 10, Role.Fighter, Talent.Paladin,
+                ItemFactory.getMagicLongSword(), ItemFactory.FULL_PLATE, ItemFactory.SHIELD,
+                null, null, this.spellService.getCharacterSpells(3)),
             new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
-                ItemFactory.getMagicMace(), ItemFactory.FULL_PLATE, ItemFactory.SHIELD, ItemFactory.getRingOfPrecision(), null,
-                 this.spellService.getCharacterSpells()),
+                ItemFactory.getMagicMace(), ItemFactory.FULL_PLATE, ItemFactory.SHIELD, ItemFactory.getRing(Power.OfPrecision, 2), null,
+                this.spellService.getCharacterSpells()),
             new Character('Lissandra', 0, 0, 4, 4, 10, Role.Spellcaster, Talent.Luminous,
                 ItemFactory.getMagicMace(), ItemFactory.CHAIN_MAIL, ItemFactory.SHIELD, null, null, this.spellService.getCharacterSpells())
         ];

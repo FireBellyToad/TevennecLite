@@ -78,8 +78,4 @@ export class EntitycomponentComponent implements OnInit {
   getConditionString(condition: Condition): string {
     return Condition[condition]
   }
-
-  getDamageModifierString(damageRoll: DamageRoll): string {
-    return ((damageRoll.modifier === 0) ? '' : ((damageRoll.modifier < 0) ? '-' : '+') + Math.abs(damageRoll.modifier));
-  }
 }

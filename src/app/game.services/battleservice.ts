@@ -47,7 +47,7 @@ export class BattleService {
     manageRoundStartEffect(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
 
 
-        for (const entity of entitiesInBattle) {
+        entitiesInBattle.forEach((entity: GameEntity) => {
             // Clean all penalties
             entity.clearPenalties();
 
@@ -58,14 +58,16 @@ export class BattleService {
 
             // Auras
             entity.activeAuras.forEach((value: number, aura: AuraEffect) => {
-                if (aura === AuraEffect.Iracundia) {
-                    entity.takeDamage(4, DamageType.Untyped)
-                }
                 if (aura === AuraEffect.Impulsus) {
-                    entity.gainHP(entity.getWil())
+                    entitiesInBattle.forEach((target: GameEntity) => {
+                        if (target instanceof Monster) {
+                            target.takeDamage(entity.getWil(), DamageType.Light);
+                            this.logger.addDamageEntry(target.name, 'Impulsus', entity.getWil().toString());
+                        }
+                    });
                 }
             })
-        }
+        });
 
         clearInterval(this.battleTimer);
         this.battleTimer = setInterval(() => { this.rollRoundInitiative(entitiesInBattle, playerTurnAction) }, 1500);
@@ -74,7 +76,7 @@ export class BattleService {
     // Rolls initiative for all the entities and sorts the from higher to lower
     rollRoundInitiative(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
 
-        for (const entity of entitiesInBattle) {
+        entitiesInBattle.forEach((entity: GameEntity) => {
 
             if (!entity.cannotAct()) {
                 entity.rollInitiative();
@@ -82,14 +84,10 @@ export class BattleService {
                     entity.getCurrentInitiative().toString(),
                     LogEntry.COLOR_BLUE);
             }
-        }
+        });
 
         entitiesInBattle.sort((a: GameEntity, b: GameEntity) => {
-            if (a.getCurrentInitiative().totalResult <= b.getCurrentInitiative().totalResult) {
-                return 1;
-            } else {
-                return -1;
-            }
+            return (a.getCurrentInitiative().totalResult <= b.getCurrentInitiative().totalResult) ? 1 : -1;
         });
 
         clearInterval(this.battleTimer);
@@ -103,7 +101,7 @@ export class BattleService {
         const turnActions = new Map<GameEntity, BattleTurn>();
         const monsterTargets = entitiesInBattle.filter(en => en instanceof Character);
 
-        for (const entity of entitiesInBattle) {
+        entitiesInBattle.forEach((entity: GameEntity) => {
 
             if (entity instanceof Monster) {
                 turnActions.set(entity, this.getMonsterAction(entity, monsterTargets));
@@ -112,7 +110,7 @@ export class BattleService {
                 // turnActions.set(entity, this.getMonsterAction(entity, [playerTurnAction.target]));
             }
 
-        }
+        });
 
         clearInterval(this.battleTimer);
         this.battleTimer = setInterval(() => { this.doResolveTurns(turnActions) }, 1500);
@@ -133,7 +131,7 @@ export class BattleService {
                 // If confused, on a 33% damages himself instead of acting
                 if (entity.conditions.has(Condition.Confused) && (new StandardDiceRoll(1, 3).totalResult === 1)) {
 
-                    const dmg = new DamageRoll(1, 4, 0, DamageType.Untyped);
+                    const dmg = new DamageRoll([{ numberOfDices: 1, dice: 4 }], 0, DamageType.Untyped);
                     entity.takeDamageFromRoll(dmg);
 
                     this.logger.addDamageEntry(entity.name, 'confusion', dmg.toString());
@@ -274,6 +272,7 @@ export class BattleService {
         const spellTocast = isQuickSpellCasting ? entity.spellsKnown.get(turn.quickSpell) : entity.spellsKnown.get(turn.spell);
         let canCast = false;
 
+        // Check if can spend or reserve slots
         if (spellTocast instanceof AuraSpell) {
             canCast = entity.canReserveEnergySlots(spellTocast.slotExpendend);
         } else {
@@ -283,7 +282,7 @@ export class BattleService {
         // For each time the caster has been hit, he tries to concentrate
         if (canCast) {
             for (const tar of entitiesHit.filter(en => en.target === entity)) {
-                if (!tar.target.attemptConcentration(tar.damage.damageRoll.totalResult)) {
+                if (!tar.target.attemptConcentration(tar.damage.totalDamage)) {
                     this.logger.addEntry(tar.target.name + ' fails to concentrate ');
                     canCast = false;
                     break;
@@ -405,7 +404,9 @@ export class BattleService {
             });
 
             // The entities that have spent or lost energy slots this round will regain slots in the next one
-            if (!entity.conditions.has(Condition.Dead) && entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
+            // Unless he has Iracundia on, or is Dead
+            if (!entity.conditions.has(Condition.Dead) && !entity.activeAuras.has(AuraEffect.Iracundia) &&
+                entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
                 // Ospitaler Talent feature
                 if (entity.talent === Talent.Ospitaler) {
                     this.mustRegainSlots.set(entity, 2);

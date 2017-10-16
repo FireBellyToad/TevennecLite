@@ -28,8 +28,8 @@ export class SpellService {
             new AuraSpell('Celeritas', 3, 2, false, AuraEffect.Celeritas, log),
             new AuraSpell('Fortitudo', 4, 2, false, AuraEffect.Fortitudo, log),
             new AuraSpell('Consecratio', 4, 2, false, AuraEffect.Consecratio, log),
-            new AuraSpell('Impulsus', 3, 2, false, AuraEffect.Impulsus, log),
-            new AuraSpell('Iracundia', 2, 1, false, AuraEffect.Iracundia, log),
+            new AuraSpell('Impulsus', 2, 1, false, AuraEffect.Impulsus, log),
+            new AuraSpell('Iracundia', 3, 2, false, AuraEffect.Iracundia, log),
             {
                 name: 'Medico',
                 spellLevel: 1,
@@ -125,7 +125,7 @@ export class SpellService {
 
                     if (!savingThrow.isSuccessful()) {
 
-                        const dmg = new DamageRoll(1, 6, caster.getWil(), DamageType.Light, false,
+                        const dmg = new DamageRoll([{ numberOfDices: 1, dice: 6 }], caster.getWil(), DamageType.Light, false,
                             false, caster.talent === Talent.Luminous);
                         const finalDamage = targets[0].takeDamageFromRoll(dmg);
 
@@ -149,7 +149,7 @@ export class SpellService {
 
                     // All the targets take 2d8+(Wil*2) damage, TOU save halves
                     log.addEntry(caster.name + ' casts ' + this.name);
-                    for (const target of targets) {
+                    targets.forEach((target: GameEntity) => {
 
                         const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(),
                             caster.getDifficultyClass(),
@@ -157,7 +157,7 @@ export class SpellService {
                             target.name,
                             log);
 
-                        const dmg = new DamageRoll(2, 8, caster.getWil() * 2, DamageType.Light, false,
+                        const dmg = new DamageRoll([{ numberOfDices: 2, dice: 8 }], caster.getWil() * 2, DamageType.Light, false,
                             savingThrow.isSuccessful(), caster.talent === Talent.Luminous);
 
                         const finalDamage = target.takeDamageFromRoll(dmg);
@@ -172,7 +172,7 @@ export class SpellService {
                             dmg.toString(),
                             finalDamage.toString(),
                             resImmVulMessage);
-                    }
+                    });
                 }
             }, {
                 name: 'Phalanx',
@@ -183,7 +183,7 @@ export class SpellService {
 
                     // All the targets take 1d8+(Will) damage, Agi save halves
                     log.addEntry(caster.name + ' casts ' + this.name);
-                    for (const target of targets) {
+                    targets.forEach((target: GameEntity) => {
 
                         const savingThrow = new SavingThrow(targets[0].getAgiSavingThrow(),
                             caster.getDifficultyClass(),
@@ -191,7 +191,7 @@ export class SpellService {
                             target.name,
                             log);
 
-                        const dmg = new DamageRoll(1, 8, caster.getWil(), DamageType.Light, false,
+                        const dmg = new DamageRoll([{ numberOfDices: 1, dice: 8 }], caster.getWil(), DamageType.Light, false,
                             savingThrow.isSuccessful(), caster.talent === Talent.Luminous);
 
                         const finalDamage = target.takeDamageFromRoll(dmg);
@@ -206,7 +206,7 @@ export class SpellService {
                             dmg.toString(),
                             finalDamage.toString(),
                             resImmVulMessage);
-                    }
+                    });
                 }
             }, {
                 name: 'Cause Wounds',
@@ -225,7 +225,12 @@ export class SpellService {
                         targets[0].name,
                         log);
 
-                    const dmg = new DamageRoll(1, 4, caster.getWil(), DamageType.Darkness, false, savingThrow.isSuccessful());
+                    const dmg = new DamageRoll([{ numberOfDices: 1, dice: 4 }],
+                        caster.getWil(),
+                        DamageType.Darkness,
+                        false,
+                        savingThrow.isSuccessful());
+
                     const finalDamage = targets[0].takeDamageFromRoll(dmg);
 
                     let resImmVulMessage = '';
@@ -257,7 +262,12 @@ export class SpellService {
                         targets[0].name,
                         log);
 
-                    const dmg = new DamageRoll(3, 4, caster.getWil(), DamageType.Darkness, false, savingThrow.isSuccessful());
+                    const dmg = new DamageRoll([{ numberOfDices: 3, dice: 4 }],
+                        caster.getWil(),
+                        DamageType.Darkness,
+                        false,
+                        savingThrow.isSuccessful());
+
                     const finalDamage = targets[0].takeDamageFromRoll(dmg);
 
                     let resImmVulMessage = '';
@@ -289,7 +299,12 @@ export class SpellService {
                         targets[0].name,
                         log);
 
-                    const dmg = new DamageRoll(6, 4, caster.getWil(), DamageType.Darkness, false, savingThrow.isSuccessful());
+                    const dmg = new DamageRoll([{ numberOfDices: 6, dice: 4 }],
+                        caster.getWil(),
+                        DamageType.Darkness,
+                        false,
+                        savingThrow.isSuccessful());
+
                     const finalDamage = targets[0].takeDamageFromRoll(dmg);
 
                     let resImmVulMessage = '';

@@ -225,7 +225,7 @@ export abstract class GameEntity {
 
     takeDamageFromRoll(roll: DamageRoll): number {
 
-        return this.takeDamage(roll.damageRoll.totalResult, roll.damageType);
+        return this.takeDamage(roll.totalDamage, roll.damageType);
     }
 
 
@@ -303,7 +303,7 @@ export abstract class GameEntity {
 
         switch (condition) {
             case Condition.Bleeding: {
-                this.takeDamageFromRoll(new DamageRoll(1, 6, 0, DamageType.Untyped))
+                this.takeDamageFromRoll(new DamageRoll([{ numberOfDices: 1, dice: 6 }], 0, DamageType.Untyped))
                 break;
             }
             case Condition.Frightened: {

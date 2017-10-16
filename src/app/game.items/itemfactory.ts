@@ -32,6 +32,9 @@ export class ItemFactory {
     static getMagicMace(powers?: Map<Power, number>) {
         return new Weapon('Mace', 1, 6, [WeaponType.OneHanded, WeaponType.Bludgeoning], 1, powers);
     }
+    static getMagicLongSword(powers?: Map<Power, number>) {
+        return new Weapon('Long sword', 1, 8, [WeaponType.OneHanded, WeaponType.Slashing], 1, powers);
+    }
     static getMagicGreatSword(powers?: Map<Power, number>) {
         return new Weapon('Great sword', 1, 12, [WeaponType.TwoHanded, WeaponType.Slashing], 1, powers);
     }
@@ -46,10 +49,10 @@ export class ItemFactory {
         return new Armor('Full plate', 8, ArmorType.Heavy, powers);
     }
 
-    static getRingOfPrecision() {
+    static getRing(power: Power, value: number) {
 
         const powers = new Map<Power, number>();
-        powers.set(Power.OfPrecision, 2);
+        powers.set(power, value);
         return new Ring(powers);
     }
 }

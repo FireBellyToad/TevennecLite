@@ -56,8 +56,8 @@ export class Character extends GameEntity {
             this.armor = armor === null ? ItemFactory.UNARMORED : armor;
         }
 
-        // Spellcaster Prophet Class Feature
-        if (this.role === Role.Spellcaster && level === 10) {
+        // Spellcaster Prophet Role Feature or Paladin Talent Feature
+        if (this.talent === Talent.Paladin || (this.role === Role.Spellcaster && level === 10) ) {
             this.energySlots = Math.min(6, this.energySlots + 1);
             this.availableSlots = this.energySlots;
         }
@@ -138,7 +138,7 @@ export class Character extends GameEntity {
         // Champion Figher Class Feature
         if (this.role === Role.Fighter && this.level >= 8) {
             this.lastAttackRoll = new AdvantageDiceRoll(1, 20, this.getATK());
-        }else{
+        } else {
             this.lastAttackRoll = new StandardDiceRoll(1, 20, this.getATK());
         }
 
@@ -161,31 +161,9 @@ export class Character extends GameEntity {
             totalModifier += 2;
         }
 
-        // Irancudia Aura Effect
-        if (this.activeAuras.has(AuraEffect.Iracundia)) {
-            totalModifier += 3;
-        }
-
         // Weapon Magical Damage Bonus
         if (this.weapon.powers.has(Power.Destructive)) {
-
-            const value = this.weapon.powers.get(Power.Destructive);
-
-            switch (value) {
-                case 1: {
-                    totalModifier += 1;
-                    break;
-                }
-                case 2: {
-                    totalModifier += new StandardDiceRoll(1, 3, 0).totalResult;
-                    break;
-                }
-                case 3: {
-                    totalModifier += new StandardDiceRoll(1, 4, 1).totalResult;
-                    break;
-                }
-            }
-
+            totalModifier += 2;
         }
 
         let isCritical = false;
@@ -195,7 +173,14 @@ export class Character extends GameEntity {
         }
 
         const damageType = this.activeAuras.has(AuraEffect.Arma) ? DamageType.Light : this.weapon.damageType;
-        return new DamageRoll(1, this.weapon.weaponDice, totalModifier, damageType, isCritical);
+        const totalDices = [{ numberOfDices: 1, dice: this.weapon.weaponDice }]
+
+        // Iracundia Damage Bonus
+        if (this.activeAuras.has(AuraEffect.Iracundia)) {
+            totalDices.push({ numberOfDices: 1, dice: 6})
+        }
+
+        return new DamageRoll(totalDices, totalModifier, damageType, isCritical);
     }
 
     public getDEF(): number {

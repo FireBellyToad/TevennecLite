@@ -103,7 +103,10 @@ export class Monster extends GameEntity {
             isCritical = this.lastAttackRoll.naturalResults[0] + this.min >= 20;
         }
 
-        return new DamageRoll(1, this.weapon.weaponDice, Math.floor(this.tou / 2) - this.dmgPenalty, type, isCritical);
+        return new DamageRoll([{ numberOfDices: 1, dice: this.weapon.weaponDice }],
+            Math.floor(this.tou / 2) - this.dmgPenalty,
+            type,
+            isCritical);
     }
 
     getDEF(): number {
@@ -121,7 +124,7 @@ export class Monster extends GameEntity {
         let levelModifier = 0;
 
         // Brute and Boss Role Feature
-        if (this.role === Role.Brute || this.role === Role.Boss)  {
+        if (this.role === Role.Brute || this.role === Role.Boss) {
             levelModifier += Math.floor(this.level / 5);
         }
 

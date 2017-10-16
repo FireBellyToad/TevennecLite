@@ -6,21 +6,32 @@ import { AdvantageDiceRoll } from 'app/game.dicerollers/advantagediceroll';
 export class DamageRoll {
 
     modifier: number;
-    damageRoll: DiceRoll;
+    damageRolls: DiceRoll[] = [];
     damageType: DamageType;
     isCritical: boolean;
     isHalved: boolean;
+    totalDamage = 0;
 
-    constructor(numberOfDices: number, dice: number, modifier: number, damageType: DamageType,
+    constructor(dices: { numberOfDices: number, dice: number }[], modifier: number, damageType: DamageType,
         isCritical = false, isHalved = false, hasAdvantage = false) {
 
         if (hasAdvantage) {
+            dices.forEach((dice: { numberOfDices: number, dice: number }) => {
+                this.damageRolls.push(new AdvantageDiceRoll(dice.numberOfDices, dice.dice, 0, isCritical, isHalved));
+            });
 
-            this.damageRoll = new AdvantageDiceRoll(numberOfDices, dice, modifier, isCritical, isHalved);
         } else {
 
-            this.damageRoll = new StandardDiceRoll(numberOfDices, dice, modifier, isCritical, isHalved);
+            dices.forEach((dice: { numberOfDices: number, dice: number }) => {
+                this.damageRolls.push(new StandardDiceRoll(dice.numberOfDices, dice.dice, 0, isCritical, isHalved));
+            });
         }
+
+        // Calculate the total result
+        this.damageRolls.forEach((roll: DiceRoll) => {
+            this.totalDamage += roll.totalResult;
+        });
+        this.totalDamage += modifier;
 
         this.modifier = modifier;
         this.damageType = damageType;
@@ -28,9 +39,26 @@ export class DamageRoll {
         this.isHalved = isHalved;
     }
 
-    toString() {
-        return this.damageRoll.toString() + ' '
-            + (this.isCritical ? 'CRITICAL ' : '')
+    // format "XdY + KdW + Z" or "XdY + KdW -Z" if Z is less 0, or "XdY + KdW" if Z equals 0
+    toString(): string {
+        let diceRolls = '';
+        this.damageRolls.forEach((roll: DiceRoll) => {
+            diceRolls += ((diceRolls !== '') ? '+' : '') + roll.getRollOnlyString();
+        });
+
+        return this.getRollOnlyString()
+            + ' = ' + this.totalDamage
+            + (this.isCritical ? ' CRITICAL ' : ' ')
             + DamageType[this.damageType].toLowerCase();
+    }
+
+    // format "XdY + KdW
+    getRollOnlyString() {
+        let diceRolls = '';
+        this.damageRolls.forEach((roll: DiceRoll) => {
+            diceRolls += ((diceRolls !== '') ? '+' : '') + roll.getRollOnlyString();
+        });
+
+        return diceRolls + ((this.modifier === 0) ? '' : ((this.modifier < 0) ? '-' : '+') + Math.abs(this.modifier))
     }
 }

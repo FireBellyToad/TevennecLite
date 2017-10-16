@@ -48,9 +48,12 @@ export abstract class DiceRoll {
 
     // format "XdY + Z" or "XdY-Z" if Z is less 0, or "XdY" if Z equals 0
     toString(): string {
-        return this.numberOfDices + 'd' + this.dice
-            + ((this.modifier === 0) ? '' :
-                ((this.modifier < 0) ? '-' : '+') + Math.abs(this.modifier))
+        return this.getRollOnlyString() +
+            ((this.modifier === 0) ? '' : ((this.modifier < 0) ? '-' : '+') + Math.abs(this.modifier))
             + ' = ' + this.totalResult;
+    }
+
+    getRollOnlyString(): string {
+        return this.numberOfDices + 'd' + this.dice;
     }
 }
