@@ -4,36 +4,64 @@ import { Monster } from 'app/game.entities/monster';
 import { Character } from 'app/game.entities/character';
 import { Role } from 'app/game.enums/roles';
 import { Talent } from 'app/game.enums/talents';
-import { ItemFactory } from 'app/game.items/itemfactory';
 import { WeaponType } from 'app/game.enums/weapontypes';
 import { Weapon } from 'app/game.items/weapon';
 import { MonsterType } from 'app/game.enums/monstertype';
 import { Power } from 'app/game.enums/powers';
+import { ItemService } from 'app/game.services/itemservice';
 
 @Injectable()
 export class EntitiesService {
 
     spellService: SpellService;
+    itemService: ItemService;
+
     char: Character[];
     mons: Monster[];
 
-    constructor(spellService: SpellService) {
+    constructor(spellService: SpellService, itemService: ItemService) {
         this.spellService = spellService;
+        this.itemService = itemService;
+
+        const precise = new Map<Power, number>();
+        precise.set(Power.Precise, 1);
+
+        const blessedOfTheBear = new Map<Power, number>();
+        blessedOfTheBear.set(Power.OfTheBear, 1);
+        blessedOfTheBear.set(Power.Blessed, 2);
+
+        const destructiveOfPrecision = new Map<Power, number>();
+        destructiveOfPrecision.set(Power.OfPrecision, 3);
+        destructiveOfPrecision.set(Power.Destructive, 0);
+
+
+        const lumionousOfTheEagle = new Map<Power, number>();
+        lumionousOfTheEagle.set(Power.Luminous, 1);
+        lumionousOfTheEagle.set(Power.OfTheEagle, 2)
 
         this.char = [
-            new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Exemplar,
-                ItemFactory.PITCHFORK),
-            new Character('Regrell', 4, 3, 3, 1, 10, Role.Fighter, Talent.Exemplar,
-                ItemFactory.getMagicGreatSword(), ItemFactory.FULL_PLATE, null, ItemFactory.getRing(Power.OfPrecision, 2), null,
+            new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Cleric,
+                itemService.getWeaponByName('Pitchfork')),
+            new Character('Tulpin', 1, 5, 1, 0, 10, Role.Fighter, Talent.Duelist,
+                itemService.getMagicWeapon('Short sword', precise),
+                itemService.getMagicArmorByName('Chain mail', blessedOfTheBear)),
+            new Character('Regrell', 4, 3, 3, 1, 10, Role.Fighter, Talent.Mercenary,
+                itemService.getMagicWeapon('Great sword', destructiveOfPrecision),
+                itemService.getArmorByName('Full plate'),
+                null, itemService.getRing(Power.OfPrecision, 2), null,
                 this.spellService.getCharacterSpells(2)),
             new Character('Sir Matheus', 3, 2, 3, 0, 10, Role.Fighter, Talent.Paladin,
-                ItemFactory.getMagicLongSword(), ItemFactory.FULL_PLATE, ItemFactory.SHIELD,
+                itemService.getMagicWeapon('Long sword', lumionousOfTheEagle),
+                itemService.getArmorByName('Full plate'),
+                itemService.getShield(),
                 null, null, this.spellService.getCharacterSpells(3)),
             new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
-                ItemFactory.getMagicMace(), ItemFactory.FULL_PLATE, ItemFactory.SHIELD, ItemFactory.getRing(Power.OfPrecision, 2), null,
+                itemService.getMagicWeapon('Morningstar'), itemService.getArmorByName('Full plate'), itemService.getShield(),
+                itemService.getRing(Power.OfPrecision, 2), null,
                 this.spellService.getCharacterSpells()),
             new Character('Lissandra', 0, 0, 4, 4, 10, Role.Spellcaster, Talent.Luminous,
-                ItemFactory.getMagicMace(), ItemFactory.CHAIN_MAIL, ItemFactory.SHIELD, null, null, this.spellService.getCharacterSpells())
+                itemService.getMagicWeapon('Mace'), itemService.getArmorByName('Chain mail'), itemService.getShield(), null, null,
+                this.spellService.getCharacterSpells())
         ];
         this.mons = [
             new Monster('Lesser Daemon', 0, 1, 2, 1, 2,
@@ -48,7 +76,8 @@ export class EntitiesService {
                 new Weapon('Bite', 1, 2, [WeaponType.OneHanded, WeaponType.Piercing])),
             new Monster('Necrospecter', 3, 2, 2, 1, 4,
                 Role.Brute, Talent.Quick, MonsterType.LesserUndead,
-                new Weapon('Claw', 1, 4, [WeaponType.OneHanded, WeaponType.Slashing])),
+                new Weapon('Claw', 1, 4, [WeaponType.OneHanded, WeaponType.Slashing]),
+                [this.spellService.getSpellByName('Fear')]),
             new Monster('Abomination', 4, 2, 2, 0, 5,
                 Role.Brute, Talent.Lethal, MonsterType.Native,
                 new Weapon('Tentacle', 1, 4, [WeaponType.OneHanded, WeaponType.Piercing]),
@@ -65,8 +94,8 @@ export class EntitiesService {
                 this.spellService.getSpellByName('Greater Mind Wave')]),
             new Monster('Risen Soldier', 4, 4, 2, 2, 7,
                 Role.Brute, Talent.Trained, MonsterType.MajorUndead,
-                ItemFactory.SHORT_SWORD, [this.spellService.getSpellByName('Cure Wounds')]),
-            new Monster('Death Giant', 8, 2, 2, 1, 9,
+                itemService.getWeaponByName('Short sword'), [this.spellService.getSpellByName('Cure Wounds')]),
+            new Monster('Death Giant', 10, 2, 2, 1, 9,
                 Role.Brute, Talent.Big, MonsterType.MajorUndead,
                 new Weapon('Smash', 1, 12, [WeaponType.OneHanded, WeaponType.Bludgeoning])),
             new Monster('Lich', 2, 4, 8, 6, 10,

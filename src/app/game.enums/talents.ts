@@ -1,13 +1,14 @@
 export enum Talent {
     // Character Talents
-    Merchant,
+    Cleric,
     Corrupted,
-    Templar,
-    Paladin,
     Duelist,
     Luminous,
-    Exemplar,
+    Merchant,
+    Mercenary,
     Ospitaler,
+    Paladin,
+    Templar,
 
     // Monster Talents
     Lethal,

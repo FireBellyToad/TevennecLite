@@ -9,7 +9,6 @@ import { WeaponType } from 'app/game.enums/weapontypes';
 import { LogEntry } from 'app/game.services/logentry';
 import { GameEntity } from 'app/game.entities/gameentity';
 import { DamageRoll } from 'app/game.utils/damageroll';
-import { ItemFactory } from 'app/game.items/itemfactory';
 import { Castable } from 'app/game.spells/castable';
 import { Logger } from 'app/game.services/logger';
 import { SpellService } from 'app/game.services/spellservice';
@@ -43,8 +42,8 @@ export class BattlemoduleComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.char = this.characterService.getCharacterByName('Sir Matheus');
-    this.mons = this.characterService.getMonsterByName('Boogeyman');
+    this.char = this.characterService.getCharacterByName('Tulpin');
+    this.mons = this.characterService.getMonsterByName('Lich');
   }
 
   startRound(playerTurnAction: BattleTurn) {

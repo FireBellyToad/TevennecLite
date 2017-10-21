@@ -11,6 +11,7 @@ import { SpellService } from 'app/game.services/spellservice';
 import { Condition } from 'app/game.enums/conditions';
 import { Power } from 'app/game.enums/powers';
 import { AuraEffect } from 'app/game.enums/auraeffects';
+import { Mastery } from 'app/game.enums/mastery';
 
 export abstract class GameEntity {
 

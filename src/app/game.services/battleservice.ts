@@ -17,6 +17,7 @@ import { DamageType } from 'app/game.utils/damagetypes';
 import { AuraSpell } from 'app/game.spells/auraspell';
 import { BattleTurn } from 'app/game.utils/battleturn';
 import { AuraEffect } from 'app/game.enums/auraeffects';
+import { Mastery } from 'app/game.enums/mastery';
 
 @Injectable()
 export class BattleService {
@@ -225,11 +226,19 @@ export class BattleService {
 
         let resImmVulMessage = '';
         let finalDamage = 0;
-        const canBlock = true;
+        let canBlock = true;
+        let previousBlocker;
+        // Take only not processed entries, and sort them by target name
+        let entriesToCheck = entitiesHit.filter(en => en.processed !== true);
+        entriesToCheck = entriesToCheck.sort((a, b) => {
+            return (a.target.name <= b.target.name) ? 1 : -1;
+        });
+
         // Damaging each target hit
-        for (const hitEntry of entitiesHit.filter(en => en.processed !== true)) {
+        entriesToCheck.forEach((hitEntry) => {
 
             hitEntry.processed = true;
+            canBlock = (previousBlocker !== hitEntry.target);
 
             // Block logic
             if (canBlock &&
@@ -237,8 +246,11 @@ export class BattleService {
                 hitEntry.target.attemptBlock()) {
 
                 this.logger.addEntry(hitEntry.target.name + ' blocked ' + hitEntry.attacker.name, LogEntry.COLOR_RED);
-
+                canBlock = false;
+                previousBlocker = hitEntry.target;
             } else {
+
+                //Fighter Role Feature
 
                 finalDamage = hitEntry.target.takeDamageFromRoll(hitEntry.damage);
 
@@ -260,9 +272,9 @@ export class BattleService {
                     finalDamage.toString(),
                     resImmVulMessage);
 
-                this.postAttackRoutine(hitEntry, finalDamage);
+                this.postDamageRoutine(hitEntry, finalDamage);
             }
-        }
+        });
     }
 
     // Spells Routine
@@ -297,13 +309,13 @@ export class BattleService {
         }
     }
 
-    postAttackRoutine(hitEntry: { target: GameEntity, attacker: GameEntity, damage: DamageRoll, processed: boolean }, finalDamage: number) {
+    postDamageRoutine(hitEntry: { target: GameEntity, attacker: GameEntity, damage: DamageRoll, processed: boolean }, finalDamage: number) {
 
         // Big Talent Feature
         if (hitEntry.attacker.talent === Talent.Big) {
             const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
                 finalDamage,
-                false,
+                hitEntry.target.role === Role.Fighter && hitEntry.target.level >= 6,
                 hitEntry.target.name,
                 this.logger);
 
@@ -311,11 +323,8 @@ export class BattleService {
 
                 hitEntry.target.takeCondition(Condition.Stunned, 1);
             }
-        }
-
-        // Lethal Talent Feature
-        if (hitEntry.attacker.talent === Talent.Lethal) {
-
+        } else if (hitEntry.attacker.talent === Talent.Lethal) {
+            // Lethal Talent Feature
             const random = new StandardDiceRoll(1, hitEntry.attacker.spellsKnown.size);
             const spellsTocast = Array.from(hitEntry.attacker.spellsKnown.values());
             spellsTocast[random.totalResult - 1].cast([hitEntry.target], hitEntry.attacker);
@@ -323,56 +332,50 @@ export class BattleService {
 
         // Fighter Role Feature
         if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 4) {
-            if (hitEntry.attacker.weapon.types.includes(WeaponType.Slashing) && hitEntry.damage.isCritical) {
+            hitEntry.attacker.weapon.masteries.forEach((mastery: Mastery, i: number, arr: Mastery[]) => {
+                switch (mastery) {
+                    case Mastery.Maim: {
 
-                if (!hitEntry.target.takeCondition(Condition.Maimed, -1)) {
-                    this.logger.addEntry(hitEntry.target.name + ' cannot be Maimed');
-                }
-                if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 10) {
-
-                    const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
-                        finalDamage,
-                        false,
-                        hitEntry.target.name,
-                        this.logger);
-
-                    if (!savingThrow.isSuccessful()) {
-
-                        if (!hitEntry.target.takeCondition(Condition.Stunned, 1)) {
-                            this.logger.addEntry(hitEntry.target.name + ' cannot be Stunned');
+                        if (hitEntry.damage.isCritical && !hitEntry.target.takeCondition(Condition.Maimed, -1)) {
+                            this.logger.addEntry(hitEntry.target.name + ' cannot be Maimed');
                         }
+                        break;
+                    }
+                    case Mastery.Stun: {
+
+                        let bonus = 0;
+                        if (arr.includes(Mastery.ImprovedStun) && hitEntry.attacker.level >= 10) {
+                            bonus = 2;
+                        }
+
+                        const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
+                            finalDamage + bonus,
+                            false,
+                            hitEntry.target.name,
+                            this.logger);
+
+                        if (!savingThrow.isSuccessful()) {
+
+                            if (!hitEntry.target.takeCondition(Condition.Stunned, 1)) {
+                                this.logger.addEntry(hitEntry.target.name + ' cannot be Stunned');
+                            }
+                        }
+                        break;
+                    }
+                    case Mastery.Bleed: {
+                        let time = 2;
+
+                        if (arr.includes(Mastery.ImprovedBleed) && hitEntry.attacker.level >= 10) {
+                            time = 4;
+                        }
+
+                        if (hitEntry.damage.isCritical && !hitEntry.target.takeCondition(Condition.Bleeding, time)) {
+                            this.logger.addEntry(hitEntry.target.name + ' cannot be Bleeded');
+                        }
+                        break;
                     }
                 }
-            } else if (hitEntry.attacker.weapon.types.includes(WeaponType.Bludgeoning)) {
-
-                let bonus = 0;
-                if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 10) {
-                    bonus = 2;
-                }
-
-                const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
-                    finalDamage + bonus,
-                    false,
-                    hitEntry.target.name,
-                    this.logger);
-
-                if (!savingThrow.isSuccessful()) {
-
-                    if (!hitEntry.target.takeCondition(Condition.Stunned, 1)) {
-                        this.logger.addEntry(hitEntry.target.name + ' cannot be Stunned');
-                    }
-                }
-            } else if (hitEntry.attacker.weapon.types.includes(WeaponType.Piercing) && hitEntry.damage.isCritical) {
-                let time = 2;
-
-                if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 10) {
-                    time = 4;
-                }
-
-                if (!hitEntry.target.takeCondition(Condition.Bleeding, time)) {
-                    this.logger.addEntry(hitEntry.target.name + ' cannot be Bleeded');
-                }
-            }
+            });
         }
     }
 

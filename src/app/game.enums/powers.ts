@@ -8,7 +8,11 @@ export enum Power {
     ofCelerity,
     Luminous,
     Quick,
-    
+
     // Armor Powers
-    Defensive
+    Defensive,
+    Blessed,
+    OfBlessing,
+    OfTheFox,
+    OfTheBear
 }

@@ -10,6 +10,7 @@ import { Logger } from 'app/game.services/logger';
 import { SpellService } from 'app/game.services/spellservice';
 import { EntitiesService } from 'app/game.services/entityservice';
 import { BattleService } from 'app/game.services/battleservice';
+import { ItemService } from 'app/game.services/itemservice';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { BattleService } from 'app/game.services/battleservice';
               Logger,
               SpellService,
               EntitiesService,
+              ItemService,
               BattleService],
   bootstrap: [AppComponent]
 })

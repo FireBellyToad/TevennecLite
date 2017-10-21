@@ -11,13 +11,13 @@ import { Talent } from 'app/game.enums/talents';
 import { WeaponType } from 'app/game.enums/weapontypes';
 import { ArmorType } from 'app/game.enums/armortypes';
 import { DamageType } from 'app/game.utils/damagetypes';
-import { ItemFactory } from 'app/game.items/itemfactory';
 import { Shield } from 'app/game.items/shield';
 import { SpellService } from 'app/game.services/spellservice';
 import { Castable } from 'app/game.spells/castable';
 import { Condition } from 'app/game.enums/conditions';
 import { AuraEffect } from 'app/game.enums/auraeffects';
 import { Ring } from 'app/game.items/ring';
+import { Mastery } from 'app/game.enums/mastery';
 
 export class Character extends GameEntity {
 
@@ -42,22 +42,12 @@ export class Character extends GameEntity {
         this.leftRing = leftRing;
         this.rightRing = rightRing;
 
-        if (this.role === Role.Fighter) {
+        this.weapon = weapon;
+        this.armor = armor;
 
-            this.weapon = weapon === null ? ItemFactory.LONG_SWORD : weapon;
-            this.armor = armor === null ? ItemFactory.LEATHER_ARMOR : armor;
-
-            if (!this.weapon.types.includes(WeaponType.TwoHanded)) {
-                this.shield = shield === null ? ItemFactory.SHIELD : shield;
-            }
-        } else if (this.role === Role.Spellcaster) {
-
-            this.weapon = weapon === null ? ItemFactory.MACE : weapon;
-            this.armor = armor === null ? ItemFactory.UNARMORED : armor;
-        }
 
         // Spellcaster Prophet Role Feature or Paladin Talent Feature
-        if (this.talent === Talent.Paladin || (this.role === Role.Spellcaster && level === 10) ) {
+        if (this.talent === Talent.Paladin || (this.role === Role.Spellcaster && level === 10)) {
             this.energySlots = Math.min(6, this.energySlots + 1);
             this.availableSlots = this.energySlots;
         }
@@ -107,6 +97,67 @@ export class Character extends GameEntity {
         }
     }
 
+    // Overriding Attributes Getters
+    getTou(): number {
+        let touBonus = 0;
+
+        if (this.armor.powers.has(Power.OfTheBear)) {
+            touBonus += 1;
+        }
+
+        if (this.leftRing && this.leftRing.powers.has(Power.OfTheBear)) {
+            touBonus += 1;
+        } else if (this.rightRing && this.rightRing.powers.has(Power.OfTheBear)) {
+            touBonus += 1;
+        }
+
+        return this.tou + touBonus - this.touPenalty
+    }
+    getAgi(): number {
+        let agiBonus = 0;
+
+        if (this.weapon.powers.has(Power.OfTheCat)) {
+            agiBonus += 1;
+        }
+
+        if (this.leftRing && this.leftRing.powers.has(Power.OfTheCat)) {
+            agiBonus += 1;
+        } else if (this.rightRing && this.rightRing.powers.has(Power.OfTheCat)) {
+            agiBonus += 1;
+        }
+        return this.agi + agiBonus - this.agiPenalty
+    }
+    getMin(): number {
+        let minBonus = 0;
+
+        if (this.armor.powers.has(Power.OfTheFox)) {
+            minBonus += 1;
+        }
+
+        if (this.leftRing && this.leftRing.powers.has(Power.OfTheFox)) {
+            minBonus += 1;
+        } else if (this.rightRing && this.rightRing.powers.has(Power.OfTheFox)) {
+            minBonus += 1;
+        }
+
+        return this.min + minBonus - this.minPenalty
+    }
+    getWil(): number {
+        let wilBonus = 0;
+
+        if (this.weapon.powers.has(Power.OfTheEagle)) {
+            wilBonus += 1;
+        }
+
+        if (this.leftRing && this.leftRing.powers.has(Power.OfTheEagle)) {
+            wilBonus += 1;
+        } else if (this.rightRing && this.rightRing.powers.has(Power.OfTheEagle)) {
+            wilBonus += 1;
+        }
+
+        return this.wil + wilBonus - this.wilPenalty
+    }
+
     getATK(): number {
 
         let competence = 0;
@@ -119,8 +170,10 @@ export class Character extends GameEntity {
         }
 
         // Magic Weapon bonus
-        if (this.weapon.powers.has(Power.Precise) || this.weapon.powers.has(Power.OfPrecision)) {
+        if (this.weapon.powers.has(Power.Precise)) {
             magicBonus += this.weapon.powers.get(Power.Precise);
+        } else if (this.weapon.powers.has(Power.OfPrecision)) {
+            magicBonus += this.weapon.powers.get(Power.OfPrecision);
         }
 
         // Magic Ring bonus
@@ -166,18 +219,31 @@ export class Character extends GameEntity {
             totalModifier += 2;
         }
 
+        // Check if attack roll was a critical hit
         let isCritical = false;
 
         if (this.lastAttackRoll !== undefined) {
             isCritical = this.lastAttackRoll.naturalResults[0] + this.getMin() >= 20;
         }
 
-        const damageType = this.activeAuras.has(AuraEffect.Arma) ? DamageType.Light : this.weapon.damageType;
+        let damageType = this.weapon.damageType;
+
+        // If has Arma Aura Active change damage type
+        if (this.activeAuras.has(AuraEffect.Arma)) {
+            damageType = DamageType.Light;
+        }
+
         const totalDices = [{ numberOfDices: 1, dice: this.weapon.weaponDice }]
 
         // Iracundia Damage Bonus
         if (this.activeAuras.has(AuraEffect.Iracundia)) {
-            totalDices.push({ numberOfDices: 1, dice: 6})
+            totalDices.push({ numberOfDices: 1, dice: 6 })
+        }
+
+        // Fighter with improved critical weapon
+        if (this.weapon.masteries.includes(Mastery.ImprovedCritical) && isCritical &&
+            this.role === Role.Fighter && this.level >= 4) {
+            totalModifier += 3;
         }
 
         return new DamageRoll(totalDices, totalModifier, damageType, isCritical);
@@ -201,9 +267,25 @@ export class Character extends GameEntity {
     protected getSavingThrow(attribute: number): DiceRoll {
         let totalModifier = attribute;
 
-        // Corrupter Talent feature
+        // Corrupted Talent feature
         if (this.talent === Talent.Corrupted) {
             totalModifier += 3;
+        } else if (this.talent === Talent.Merchant) {
+            totalModifier -= 1;
+        }
+
+        // Armor Bonus
+        if (this.armor.powers.has(Power.Blessed)) {
+            totalModifier += this.armor.powers.get(Power.Blessed);
+        } else if (this.armor.powers.has(Power.OfBlessing)) {
+            totalModifier += this.armor.powers.get(Power.OfBlessing);
+        }
+
+        // Rings bonus
+        if (this.leftRing && this.leftRing.powers.has(Power.OfBlessing)) {
+            totalModifier += this.leftRing.powers.get(Power.OfBlessing);
+        } else if (this.rightRing && this.rightRing.powers.has(Power.OfBlessing)) {
+            totalModifier += this.rightRing.powers.get(Power.OfBlessing);
         }
 
         // Check for Consecratio Spell Effect
@@ -226,7 +308,16 @@ export class Character extends GameEntity {
             blockValue = (this.getAgi() * 2) + 3;
         }
 
-        return this.shield != null && new StandardDiceRoll(1, 20, blockValue).totalResult >= 20;
+        // Fighter Role Feature
+        if (this.weapon.masteries.includes(Mastery.ImprovedBlock) &&
+            this.role === Role.Fighter && this.level >= 10) {
+            blockValue += 2;
+        }
+
+        return (this.shield != null || this.talent === Talent.Duelist ||
+            (this.weapon.masteries.includes(Mastery.Block) &&
+                this.role === Role.Fighter && this.level >= 4)) &&
+            new StandardDiceRoll(1, 20, blockValue).totalResult >= 20;
     }
 
     canBeBlocked(): boolean {
