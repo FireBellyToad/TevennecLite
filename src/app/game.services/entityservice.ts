@@ -34,6 +34,9 @@ export class EntitiesService {
         destructiveOfPrecision.set(Power.OfPrecision, 3);
         destructiveOfPrecision.set(Power.Destructive, 0);
 
+        const blockingOfFirmness = new Map<Power, number>();
+        blockingOfFirmness.set(Power.Blocking, 3);
+        blockingOfFirmness.set(Power.OfFirmness, 0);
 
         const lumionousOfTheEagle = new Map<Power, number>();
         lumionousOfTheEagle.set(Power.Luminous, 1);
@@ -52,8 +55,8 @@ export class EntitiesService {
                 this.spellService.getCharacterSpells(2)),
             new Character('Sir Matheus', 3, 2, 3, 0, 10, Role.Fighter, Talent.Paladin,
                 itemService.getMagicWeapon('Long sword', lumionousOfTheEagle),
-                itemService.getArmorByName('Full plate'),
-                itemService.getShield(),
+                itemService.getMagicArmorByName('Full plate', blessedOfTheBear),
+                itemService.getShield(blockingOfFirmness),
                 null, null, this.spellService.getCharacterSpells(3)),
             new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
                 itemService.getMagicWeapon('Morningstar'), itemService.getArmorByName('Full plate'), itemService.getShield(),

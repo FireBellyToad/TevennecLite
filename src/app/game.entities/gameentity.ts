@@ -36,7 +36,6 @@ export abstract class GameEntity {
     maxHp: number;
     levelupHpIncrements: number[] = [];
 
-    energySlots: number;
     availableSlots: number;
     occupiedSlots = 0;
 
@@ -71,9 +70,6 @@ export abstract class GameEntity {
 
         this.level = level;
         this.name = name;
-
-        this.energySlots = Math.max(0, Math.min(6, this.min));
-        this.availableSlots = this.energySlots;
 
         this.role = role;
         this.talent = talent;
@@ -248,6 +244,8 @@ export abstract class GameEntity {
     }
 
     // Energy Slots, return false if can't cast
+
+    abstract getEnergySlots(): number ;
     canCast(spellName: string): boolean {
         return (this.spellsKnown.has(spellName) && this.availableSlots >= this.spellsKnown.get(spellName).slotExpendend)
     }
@@ -255,7 +253,7 @@ export abstract class GameEntity {
     spendEnergySlots(toSpend: number): boolean {
 
 
-        if (this.energySlots < toSpend || this.availableSlots < toSpend) {
+        if (this.getEnergySlots() < toSpend || this.availableSlots < toSpend) {
             return false;
         }
 
@@ -267,7 +265,7 @@ export abstract class GameEntity {
     // Reserve slots for Aura spells. Returns false if can't cast
     canReserveEnergySlots(toReserve: number): boolean {
 
-        if (this.energySlots < toReserve || this.availableSlots < toReserve) {
+        if (this.getEnergySlots() < toReserve || this.availableSlots < toReserve) {
             return false;
         }
 
@@ -289,7 +287,7 @@ export abstract class GameEntity {
     // Regain Will/2 slots per round
     regainEnergySlot() {
         const toRegain = Math.max(1, Math.floor(this.getWil() / 2));
-        this.availableSlots = Math.min(this.energySlots - this.occupiedSlots, this.availableSlots + toRegain);
+        this.availableSlots = Math.min(this.getEnergySlots() - this.occupiedSlots, this.availableSlots + toRegain);
     }
 
     // Take Condition

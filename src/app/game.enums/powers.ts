@@ -5,14 +5,33 @@ export enum Power {
     OfTheCat,
     OfTheEagle,
     Destructive,
-    ofCelerity,
+    OfCelerity,
     Luminous,
     Quick,
+    OfMagic,
+    Infused,
 
     // Armor Powers
     Defensive,
+    OfTheBear,
+    OfTheFox,
+    OfTheRock,
+    OfTheDiamond,
+    OfTheSanctity,
+    OfTheDivinity,
     Blessed,
     OfBlessing,
-    OfTheFox,
-    OfTheBear
+
+    // Shield Powers,
+    Blocking,
+    Thorny,
+    OfCicatrization,
+    OfFirmness,
+    OfClarity,
+    OfFreedom,
+    OfCourage,
+    OfAntidote,
+    OfIntegrity,
+    OfHealth
+
 }

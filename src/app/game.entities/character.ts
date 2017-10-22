@@ -5,7 +5,6 @@ import { StandardDiceRoll } from 'app/game.dicerollers/standarddiceroll';
 import { DamageRoll } from 'app/game.utils/damageroll';
 import { Armor } from 'app/game.items/armor';
 import { Weapon } from 'app/game.items/weapon';
-import { Power } from 'app/game.enums/powers';
 import { Role } from 'app/game.enums/roles';
 import { Talent } from 'app/game.enums/talents';
 import { WeaponType } from 'app/game.enums/weapontypes';
@@ -18,6 +17,7 @@ import { Condition } from 'app/game.enums/conditions';
 import { AuraEffect } from 'app/game.enums/auraeffects';
 import { Ring } from 'app/game.items/ring';
 import { Mastery } from 'app/game.enums/mastery';
+import { Power } from 'app/game.enums/powers';
 
 export class Character extends GameEntity {
 
@@ -44,13 +44,8 @@ export class Character extends GameEntity {
 
         this.weapon = weapon;
         this.armor = armor;
+        this.shield = shield;
 
-
-        // Spellcaster Prophet Role Feature or Paladin Talent Feature
-        if (this.talent === Talent.Paladin || (this.role === Role.Spellcaster && level === 10)) {
-            this.energySlots = Math.min(6, this.energySlots + 1);
-            this.availableSlots = this.energySlots;
-        }
 
         // Fighter Role Feature or Templar Talent Feature
         if (this.role === Role.Fighter || this.talent === Talent.Templar) {
@@ -95,6 +90,9 @@ export class Character extends GameEntity {
             this.maxHp += Math.floor(this.level / 2);
             this.actualHP = this.maxHp;
         }
+
+        this.updateResistance();
+        this.availableSlots = this.getEnergySlots();
     }
 
     // Overriding Attributes Getters
@@ -314,7 +312,13 @@ export class Character extends GameEntity {
             blockValue += 2;
         }
 
-        return (this.shield != null || this.talent === Talent.Duelist ||
+        // Item Bonus
+        if (this.shield && this.shield.powers.has(Power.Blocking)) {
+            blockValue += this.shield.powers.get(Power.Blocking);
+        }
+
+
+        return (this.shield || this.talent === Talent.Duelist ||
             (this.weapon.masteries.includes(Mastery.Block) &&
                 this.role === Role.Fighter && this.level >= 4)) &&
             new StandardDiceRoll(1, 20, blockValue).totalResult >= 20;
@@ -324,4 +328,72 @@ export class Character extends GameEntity {
         return true;
     }
 
+    getEnergySlots(): number {
+        let bonusSlots = 0;
+
+        // Spellcaster Prophet Role Feature or Paladin Talent Feature
+        if (this.talent === Talent.Paladin || (this.role === Role.Spellcaster && this.level === 10)) {
+            bonusSlots += 1
+        }
+
+        // Bonus from Items
+        if (this.weapon && this.weapon.powers.has(Power.Infused)) {
+            bonusSlots += 1
+        }
+
+
+        return Math.max(1, (Math.min(6, this.min + bonusSlots)));
+    }
+
+    // Override
+    regainEnergySlot() {
+        const toRegain = Math.max(1, Math.floor(this.getWil() / 2));
+        this.availableSlots = Math.min(this.getEnergySlots() - this.occupiedSlots, this.availableSlots + toRegain);
+    }
+
+    updateResistance() {
+        this.resistances.splice(0);
+
+        // Bonus from Aura
+        if (this.activeAuras.has(AuraEffect.Fortitudo) || (this.armor && this.armor.powers.has(Power.OfTheDivinity))) {
+            this.resistances.push(DamageType.Physical);
+            this.resistances.push(DamageType.Supernatural);
+            this.resistances.push(DamageType.Darkness);
+        } else if (this.armor) {
+
+            if (this.armor.powers.has(Power.OfTheRock)) {
+                this.resistances.push(DamageType.Physical);
+            } else if (this.armor.powers.has(Power.OfTheDiamond)) {
+                this.resistances.push(DamageType.Supernatural);
+            } else if (this.armor.powers.has(Power.OfTheSanctity)) {
+                this.resistances.push(DamageType.Supernatural);
+            }
+        }
+
+
+    }
+
+    // Override
+    takeCondition(condition: Condition, rounds = 0, overrideUndeadImmunity = false): boolean {
+        // Check for items given immunities
+        if (this.shield.powers.has(Power.OfCicatrization) && condition === Condition.Bleeding) {
+            return false;
+        } else if (this.shield.powers.has(Power.OfAntidote) && condition === Condition.Poisoned) {
+            return false;
+        } else if (this.shield.powers.has(Power.OfClarity) && condition === Condition.Confused) {
+            return false;
+        } else if (this.shield.powers.has(Power.OfCourage) && condition === Condition.Frightened) {
+            return false;
+        } else if (this.shield.powers.has(Power.OfFirmness) && condition === Condition.Stunned) {
+            return false;
+        } else if (this.shield.powers.has(Power.OfFreedom) && condition === Condition.Paralyzed) {
+            return false;
+        } else if (this.shield.powers.has(Power.OfIntegrity) && condition === Condition.Maimed) {
+            return false;
+        } else if (this.shield.powers.has(Power.OfHealth) && condition === Condition.Ill) {
+            return false;
+        }
+
+        return super.takeCondition(condition, rounds);
+    }
 }

@@ -24,12 +24,6 @@ export class Monster extends GameEntity {
 
         super(name, tou, agi, min, wil, level, role, talent, spells);
 
-        // Boss and Sorcerer Role Feature
-        if (this.role === Role.Boss || this.role === Role.Sorcerer) {
-            this.energySlots = Math.min(6, this.energySlots + 1);
-            this.availableSlots = this.energySlots;
-        }
-
         // Boss Role Feature
         if (this.role === Role.Boss) {
             this.maxHp += 3 * this.level;
@@ -64,6 +58,7 @@ export class Monster extends GameEntity {
         if (this.monsterType === MonsterType.LesserUndead || this.monsterType === MonsterType.MajorUndead) {
             this.vulnerabilities.push(DamageType.Light);
         }
+        this.availableSlots = this.getEnergySlots();
     }
 
     getATK(): number {
@@ -144,6 +139,7 @@ export class Monster extends GameEntity {
         return this.talent !== Talent.Big;
     }
 
+    // Override
     takeCondition(condition: Condition, rounds = 0, overrideUndeadImmunity = false): boolean {
         // Undeads are Immune to conditions, but sometimes this condition could be overridden
         if ((this.monsterType !== MonsterType.LesserUndead &&
@@ -152,6 +148,17 @@ export class Monster extends GameEntity {
         }
 
         return false;
+    }
+
+    getEnergySlots(): number {
+        let bonusSlots = 0;
+
+        // Boss and Sorcerer Role Feature
+        if (this.role === Role.Boss || this.role === Role.Sorcerer) {
+            bonusSlots += 1;
+        }
+
+        return Math.max(1, (Math.min(6, this.min + bonusSlots)));
     }
 
 }

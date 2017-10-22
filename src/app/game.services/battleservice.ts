@@ -18,6 +18,7 @@ import { AuraSpell } from 'app/game.spells/auraspell';
 import { BattleTurn } from 'app/game.utils/battleturn';
 import { AuraEffect } from 'app/game.enums/auraeffects';
 import { Mastery } from 'app/game.enums/mastery';
+import { Power } from 'app/game.enums/powers';
 
 @Injectable()
 export class BattleService {
@@ -246,12 +247,22 @@ export class BattleService {
                 hitEntry.target.attemptBlock()) {
 
                 this.logger.addEntry(hitEntry.target.name + ' blocked ' + hitEntry.attacker.name, LogEntry.COLOR_RED);
+
+                // Thorny shield 
+                if (hitEntry.target instanceof Character) {
+                    if (hitEntry.target.shield.powers.has(Power.Thorny)) {
+
+                        const dmg = new DamageRoll([{ numberOfDices: 1, dice: 4 }], 0, DamageType.Supernatural);
+                        hitEntry.attacker.takeDamageFromRoll(dmg);
+
+                        this.logger.addDamageEntry(hitEntry.attacker.name, hitEntry.target.name, dmg.toString());
+                    }
+                }
                 canBlock = false;
                 previousBlocker = hitEntry.target;
             } else {
 
-                //Fighter Role Feature
-
+                // Fighter Role Feature
                 finalDamage = hitEntry.target.takeDamageFromRoll(hitEntry.damage);
 
                 if (hitEntry.target.hasImmunity(hitEntry.damage.damageType)) {
@@ -409,7 +420,7 @@ export class BattleService {
             // The entities that have spent or lost energy slots this round will regain slots in the next one
             // Unless he has Iracundia on, or is Dead
             if (!entity.conditions.has(Condition.Dead) && !entity.activeAuras.has(AuraEffect.Iracundia) &&
-                entity.availableSlots < (entity.energySlots - entity.occupiedSlots)) {
+                entity.availableSlots < (entity.getEnergySlots() - entity.occupiedSlots)) {
                 // Ospitaler Talent feature
                 if (entity.talent === Talent.Ospitaler) {
                     this.mustRegainSlots.set(entity, 2);
@@ -423,12 +434,11 @@ export class BattleService {
     }
 
     // AI for Monsters
-    // tslint:disable-next-line:max-line-length
     private getMonsterAction(entity: GameEntity, targets: GameEntity[]): BattleTurn {
 
 
         // Dumb monsters, Lethal monsters or spell less just attack
-        if (entity.getMin() < 2 || entity.talent === Talent.Lethal || entity.spellsKnown.size === 0) {
+        if (entity.getMin() < 1 || entity.talent === Talent.Lethal || entity.spellsKnown.size === 0) {
             return { action: 'atk', spell: '', quickSpell: '', auraToRelease: '', target: targets[0] };
         } else {
 
@@ -448,6 +458,7 @@ export class BattleService {
 
             // If the monster could cast a non-cure spell, he will do, or else he will attack
             let toDo: BattleTurn;
+            const chanceToCast = 1 + ((entity.role === Role.Sorcerer || entity.role === Role.Boss) ? 3 : 0)
             entity.spellsKnown.forEach((spell: Castable) => {
                 if ((entity.availableSlots >= spell.slotExpendend) &&
                     (spell.name !== 'Cure Wounds' && spell.name !== 'Medico')) {
@@ -459,7 +470,7 @@ export class BattleService {
 
                     } else {
                         // Chose one spell randomly from the list, or the last one if no other has been chosen
-                        if ((new StandardDiceRoll(1, 3)).totalResult !== 1) {
+                        if ((new StandardDiceRoll(1, chanceToCast)).totalResult !== 1) {
 
                             toDo = {
                                 action: 'cas',
