@@ -42,8 +42,8 @@ export class BattlemoduleComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.char = this.characterService.getCharacterByName('Sir Matheus');
-    this.mons = this.characterService.getMonsterByName('Boogeyman');
+    this.char = this.characterService.getCharacterByName('Dalvert');
+    this.mons = this.characterService.getMonsterByName('Horla');
   }
 
   startRound(playerTurnAction: BattleTurn) {

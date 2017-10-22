@@ -53,12 +53,6 @@ export class Character extends GameEntity {
             this.actualHP += 3;
         }
 
-        // Luminous Talent Feature
-        if (this.talent === Talent.Luminous) {
-            this.occupiedSlots = 1;
-            this.availableSlots = Math.max(0, this.availableSlots - 1);
-        }
-
         // Corrupted Talent Feature
         if (this.talent === Talent.Corrupted) {
             this.resistances.push(DamageType.Darkness);
@@ -93,6 +87,13 @@ export class Character extends GameEntity {
 
         this.updateResistance();
         this.availableSlots = this.getEnergySlots();
+
+        // Luminous Talent Feature
+        if (this.talent === Talent.Luminous) {
+            this.occupiedSlots = 1;
+            this.availableSlots = Math.max(0, this.availableSlots - 1);
+        }
+
     }
 
     // Overriding Attributes Getters
@@ -274,16 +275,16 @@ export class Character extends GameEntity {
 
         // Armor Bonus
         if (this.armor.powers.has(Power.Blessed)) {
-            totalModifier += this.armor.powers.get(Power.Blessed);
+            totalModifier += 1;
         } else if (this.armor.powers.has(Power.OfBlessing)) {
-            totalModifier += this.armor.powers.get(Power.OfBlessing);
+            totalModifier += 1;
         }
 
         // Rings bonus
         if (this.leftRing && this.leftRing.powers.has(Power.OfBlessing)) {
-            totalModifier += this.leftRing.powers.get(Power.OfBlessing);
+            totalModifier += 1;
         } else if (this.rightRing && this.rightRing.powers.has(Power.OfBlessing)) {
-            totalModifier += this.rightRing.powers.get(Power.OfBlessing);
+            totalModifier += 1;
         }
 
         // Check for Consecratio Spell Effect
@@ -347,7 +348,22 @@ export class Character extends GameEntity {
 
     // Override
     regainEnergySlot() {
-        const toRegain = Math.max(1, Math.floor(this.getWil() / 2));
+        let toRegain = 0;
+
+        // Ospitaler Talent feature
+        if (this.talent === Talent.Ospitaler) {
+            toRegain = 1
+        } else {
+            toRegain = Math.max(1, Math.floor(this.getWil() / 2));
+        }
+
+        // Rings bonus
+        if (this.leftRing && this.leftRing.powers.has(Power.OfMeditation)) {
+            toRegain += 1;
+        } else if (this.rightRing && this.rightRing.powers.has(Power.OfMeditation)) {
+            toRegain += 1;
+        }
+
         this.availableSlots = Math.min(this.getEnergySlots() - this.occupiedSlots, this.availableSlots + toRegain);
     }
 
@@ -376,22 +392,24 @@ export class Character extends GameEntity {
     // Override
     takeCondition(condition: Condition, rounds = 0, overrideUndeadImmunity = false): boolean {
         // Check for items given immunities
-        if (this.shield.powers.has(Power.OfCicatrization) && condition === Condition.Bleeding) {
-            return false;
-        } else if (this.shield.powers.has(Power.OfAntidote) && condition === Condition.Poisoned) {
-            return false;
-        } else if (this.shield.powers.has(Power.OfClarity) && condition === Condition.Confused) {
-            return false;
-        } else if (this.shield.powers.has(Power.OfCourage) && condition === Condition.Frightened) {
-            return false;
-        } else if (this.shield.powers.has(Power.OfFirmness) && condition === Condition.Stunned) {
-            return false;
-        } else if (this.shield.powers.has(Power.OfFreedom) && condition === Condition.Paralyzed) {
-            return false;
-        } else if (this.shield.powers.has(Power.OfIntegrity) && condition === Condition.Maimed) {
-            return false;
-        } else if (this.shield.powers.has(Power.OfHealth) && condition === Condition.Ill) {
-            return false;
+        if (this.shield) {
+            if (this.shield.powers.has(Power.OfCicatrization) && condition === Condition.Bleeding) {
+                return false;
+            } else if (this.shield.powers.has(Power.OfAntidote) && condition === Condition.Poisoned) {
+                return false;
+            } else if (this.shield.powers.has(Power.OfClarity) && condition === Condition.Confused) {
+                return false;
+            } else if (this.shield.powers.has(Power.OfCourage) && condition === Condition.Frightened) {
+                return false;
+            } else if (this.shield.powers.has(Power.OfFirmness) && condition === Condition.Stunned) {
+                return false;
+            } else if (this.shield.powers.has(Power.OfFreedom) && condition === Condition.Paralyzed) {
+                return false;
+            } else if (this.shield.powers.has(Power.OfIntegrity) && condition === Condition.Maimed) {
+                return false;
+            } else if (this.shield.powers.has(Power.OfHealth) && condition === Condition.Ill) {
+                return false;
+            }
         }
 
         return super.takeCondition(condition, rounds);

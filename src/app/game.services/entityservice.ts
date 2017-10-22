@@ -34,36 +34,42 @@ export class EntitiesService {
         destructiveOfPrecision.set(Power.OfPrecision, 3);
         destructiveOfPrecision.set(Power.Destructive, 0);
 
-        const blockingOfFirmness = new Map<Power, number>();
-        blockingOfFirmness.set(Power.Blocking, 3);
-        blockingOfFirmness.set(Power.OfFirmness, 0);
+        const shieldPowers = new Map<Power, number>();
+        shieldPowers.set(Power.Blocking, 3);
+        shieldPowers.set(Power.OfFirmness, 0);
 
         const lumionousOfTheEagle = new Map<Power, number>();
         lumionousOfTheEagle.set(Power.Luminous, 1);
-        lumionousOfTheEagle.set(Power.OfTheEagle, 2)
+        lumionousOfTheEagle.set(Power.OfTheEagle, 2);
+
+        const ofMagic = new Map<Power, number>();
+        lumionousOfTheEagle.set(Power.OfMagic, 1);
 
         this.char = [
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Cleric,
                 itemService.getWeaponByName('Pitchfork')),
             new Character('Tulpin', 1, 5, 1, 0, 10, Role.Fighter, Talent.Duelist,
-                itemService.getMagicWeapon('Short sword', precise),
+                itemService.getMagicWeaponByName('Short sword', precise),
                 itemService.getMagicArmorByName('Chain mail', blessedOfTheBear)),
             new Character('Regrell', 4, 3, 3, 1, 10, Role.Fighter, Talent.Mercenary,
-                itemService.getMagicWeapon('Great sword', destructiveOfPrecision),
-                itemService.getArmorByName('Full plate'),
-                null, itemService.getRing(Power.OfPrecision, 2), null,
+                itemService.getMagicWeaponByName('Great sword', destructiveOfPrecision),
+                itemService.getMagicArmorByName('Full plate', blessedOfTheBear),
+                null, itemService.getRing(Power.OfPrecision, 2), itemService.getRing(Power.OfBlessing, 2),
                 this.spellService.getCharacterSpells(2)),
             new Character('Sir Matheus', 3, 2, 3, 0, 10, Role.Fighter, Talent.Paladin,
-                itemService.getMagicWeapon('Long sword', lumionousOfTheEagle),
+                itemService.getMagicWeaponByName('Long sword', lumionousOfTheEagle),
                 itemService.getMagicArmorByName('Full plate', blessedOfTheBear),
-                itemService.getShield(blockingOfFirmness),
+                itemService.getShield(shieldPowers),
                 null, null, this.spellService.getCharacterSpells(3)),
             new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
-                itemService.getMagicWeapon('Morningstar'), itemService.getArmorByName('Full plate'), itemService.getShield(),
-                itemService.getRing(Power.OfPrecision, 2), null,
+                itemService.getMagicWeaponByName('Morningstar', destructiveOfPrecision),
+                itemService.getMagicArmorByName('Full plate', blessedOfTheBear), itemService.getShield(shieldPowers),
+                itemService.getRing(Power.OfPrecision, 2), itemService.getRing(Power.OfMeditation, 2),
                 this.spellService.getCharacterSpells()),
-            new Character('Lissandra', 0, 0, 4, 4, 10, Role.Spellcaster, Talent.Luminous,
-                itemService.getMagicWeapon('Mace'), itemService.getArmorByName('Chain mail'), itemService.getShield(), null, null,
+            new Character('Lissandra', 0, 0, 5, 4, 10, Role.Spellcaster, Talent.Luminous,
+                itemService.getMagicWeaponByName('Mace', ofMagic), itemService.getMagicArmorByName('Chain mail', blessedOfTheBear),
+                itemService.getShield(shieldPowers),
+                itemService.getRing(Power.OfTheEagle, 2), itemService.getRing(Power.OfBlessing, 2),
                 this.spellService.getCharacterSpells())
         ];
         this.mons = [
@@ -109,7 +115,11 @@ export class EntitiesService {
                 Role.Brute, Talent.Quick, MonsterType.MajorFoul,
                 new Weapon('Claw', 1, 8, [WeaponType.OneHanded, WeaponType.Slashing]),
                 [this.spellService.getSpellByName('Fear'), this.spellService.getSpellByName('Cause Serious Wounds'),
-                this.spellService.getSpellByName('Suppress Aura')])];
+                this.spellService.getSpellByName('Suppress Aura')]),
+            new Monster('Horla', 8, 8, 6, 8, 10,
+                Role.Boss, Talent.Quick, MonsterType.MajorFoul,
+                new Weapon('Claw', 1, 6, [WeaponType.OneHanded, WeaponType.Slashing]),
+                this.spellService.getMonsterSpells())];
     }
 
     getCharacterByName(name: string) {

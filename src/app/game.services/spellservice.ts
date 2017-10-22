@@ -53,7 +53,7 @@ export class SpellService {
                 isMonsterSpell: false,
                 cast: function (targets: GameEntity[], caster: GameEntity) {
 
-                    // The target becomes Paralized, on a successful WIL save becomes stunned
+                    // The target becomes Paralized, Wil Negates
 
                     log.addEntry(caster.name + ' casts ' + this.name);
 
@@ -67,11 +67,6 @@ export class SpellService {
 
                         if (!targets[0].takeCondition(Condition.Paralyzed, 2)) {
                             log.addEntry(targets[0].name + ' cannot be Paralyzed');
-                        }
-                    } else {
-
-                        if (!targets[0].takeCondition(Condition.Stunned, 1)) {
-                            log.addEntry(targets[0].name + ' cannot be Stunned');
                         }
                     }
                 }
@@ -331,9 +326,9 @@ export class SpellService {
 
                     const cureRoll = new StandardDiceRoll(1, 4, caster.getWil());
 
-                    targets[0].gainHP(cureRoll.totalResult);
+                    caster.gainHP(cureRoll.totalResult);
 
-                    log.addEntry(targets[0].name + ' gains ' + cureRoll.toString() + ' Hp');
+                    log.addEntry(caster.name + ' gains ' + cureRoll.toString() + ' Hp');
                 }
             }, {
                 name: 'Bleed',

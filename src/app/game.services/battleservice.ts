@@ -24,6 +24,7 @@ import { Power } from 'app/game.enums/powers';
 export class BattleService {
 
     private battleTimer;
+    private readonly timeToWait = 1250;
     roundFinished = true;
     logger: Logger;
 
@@ -41,7 +42,7 @@ export class BattleService {
         // Cleans log
         this.logger.addEntry('Round ' + roundNumber + ' Start', LogEntry.COLOR_GREEN);
 
-        this.battleTimer = setInterval(() => { this.manageRoundStartEffect(entitiesInBattle, playerTurnAction) }, 1500);
+        this.battleTimer = setInterval(() => { this.manageRoundStartEffect(entitiesInBattle, playerTurnAction) }, this.timeToWait);
 
     }
 
@@ -72,7 +73,7 @@ export class BattleService {
         });
 
         clearInterval(this.battleTimer);
-        this.battleTimer = setInterval(() => { this.rollRoundInitiative(entitiesInBattle, playerTurnAction) }, 1500);
+        this.battleTimer = setInterval(() => { this.rollRoundInitiative(entitiesInBattle, playerTurnAction) }, this.timeToWait);
     }
 
     // Rolls initiative for all the entities and sorts the from higher to lower
@@ -93,11 +94,10 @@ export class BattleService {
         });
 
         clearInterval(this.battleTimer);
-        this.battleTimer = setInterval(() => { this.doTurnsDefinition(entitiesInBattle, playerTurnAction) }, 1500);
+        this.battleTimer = setInterval(() => { this.doTurnsDefinition(entitiesInBattle, playerTurnAction) }, this.timeToWait);
     }
 
     // Defines turn
-    // tslint:disable-next-line:max-line-length
     doTurnsDefinition(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
 
         const turnActions = new Map<GameEntity, BattleTurn>();
@@ -115,7 +115,7 @@ export class BattleService {
         });
 
         clearInterval(this.battleTimer);
-        this.battleTimer = setInterval(() => { this.doResolveTurns(turnActions) }, 1500);
+        this.battleTimer = setInterval(() => { this.doResolveTurns(turnActions) }, this.timeToWait);
     }
 
     // Resolve Turns actions
@@ -182,7 +182,7 @@ export class BattleService {
 
         });
         clearInterval(this.battleTimer);
-        this.battleTimer = setInterval(() => { this.endRound(turnActions) }, 1500);
+        this.battleTimer = setInterval(() => { this.endRound(turnActions) }, this.timeToWait);
     }
 
     // Attack routine
@@ -248,7 +248,7 @@ export class BattleService {
 
                 this.logger.addEntry(hitEntry.target.name + ' blocked ' + hitEntry.attacker.name, LogEntry.COLOR_RED);
 
-                // Thorny shield 
+                // Thorny shield
                 if (hitEntry.target instanceof Character) {
                     if (hitEntry.target.shield.powers.has(Power.Thorny)) {
 
@@ -320,6 +320,7 @@ export class BattleService {
         }
     }
 
+    // Post Damage routine
     postDamageRoutine(hitEntry: { target: GameEntity, attacker: GameEntity, damage: DamageRoll, processed: boolean }, finalDamage: number) {
 
         // Big Talent Feature
@@ -342,7 +343,7 @@ export class BattleService {
         }
 
         // Fighter Role Feature
-        if (hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 4) {
+        if ((hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 4)) {
             hitEntry.attacker.weapon.masteries.forEach((mastery: Mastery, i: number, arr: Mastery[]) => {
                 switch (mastery) {
                     case Mastery.Maim: {
@@ -361,7 +362,7 @@ export class BattleService {
 
                         const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
                             finalDamage + bonus,
-                            false,
+                            hitEntry.target.role === Role.Fighter && hitEntry.target.level >= 6,
                             hitEntry.target.name,
                             this.logger);
 
@@ -421,12 +422,7 @@ export class BattleService {
             // Unless he has Iracundia on, or is Dead
             if (!entity.conditions.has(Condition.Dead) && !entity.activeAuras.has(AuraEffect.Iracundia) &&
                 entity.availableSlots < (entity.getEnergySlots() - entity.occupiedSlots)) {
-                // Ospitaler Talent feature
-                if (entity.talent === Talent.Ospitaler) {
-                    this.mustRegainSlots.set(entity, 2);
-                } else {
-                    this.mustRegainSlots.set(entity, 1);
-                }
+                this.mustRegainSlots.set(entity, 1);
             }
         });
         clearInterval(this.battleTimer);
@@ -458,9 +454,11 @@ export class BattleService {
 
             // If the monster could cast a non-cure spell, he will do, or else he will attack
             let toDo: BattleTurn;
-            const chanceToCast = 1 + ((entity.role === Role.Sorcerer || entity.role === Role.Boss) ? 3 : 0)
+            const chanceToCast = 1 + ((entity.role === Role.Sorcerer) ? 3 :
+                (entity.role === Role.Boss) ? (new StandardDiceRoll(1, 3, -1)).totalResult : 1)
             entity.spellsKnown.forEach((spell: Castable) => {
                 if ((entity.availableSlots >= spell.slotExpendend) &&
+                    (quickSpellMemo !== 'Cure Wounds' && quickSpellMemo !== 'Medico') &&
                     (spell.name !== 'Cure Wounds' && spell.name !== 'Medico')) {
 
                     // If is Sorcerer or Boss and is a 1st level spell, he will quickcast it

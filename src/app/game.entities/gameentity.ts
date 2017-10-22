@@ -285,10 +285,7 @@ export abstract class GameEntity {
     }
 
     // Regain Will/2 slots per round
-    regainEnergySlot() {
-        const toRegain = Math.max(1, Math.floor(this.getWil() / 2));
-        this.availableSlots = Math.min(this.getEnergySlots() - this.occupiedSlots, this.availableSlots + toRegain);
-    }
+    abstract regainEnergySlot();
 
     // Take Condition
     takeCondition(condition: Condition, rounds = 0): boolean {

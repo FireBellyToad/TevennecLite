@@ -32,6 +32,9 @@ export enum Power {
     OfCourage,
     OfAntidote,
     OfIntegrity,
-    OfHealth
+    OfHealth,
+
+    // Ring and Amulet only powers,
+    OfMeditation
 
 }

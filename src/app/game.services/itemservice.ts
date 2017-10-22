@@ -40,7 +40,7 @@ export class ItemService {
         return this.weapons.find((we: Weapon) => we.name === name)
     }
 
-    getMagicWeapon(name: string, powers = new Map<Power, number>()): Weapon {
+    getMagicWeaponByName(name: string, powers = new Map<Power, number>()): Weapon {
         const baseWeapon = this.getWeaponByName(name);
         baseWeapon.powers = powers;
         baseWeapon.updateDamageType();
@@ -57,7 +57,7 @@ export class ItemService {
         return baseArmor;
     }
 
-    getShield(powers?: Map<Power, number>) {
+    getShield(powers = new Map<Power, number>()) {
 
         return new Shield(powers);
     }
