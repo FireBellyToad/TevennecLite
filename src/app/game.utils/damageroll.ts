@@ -31,7 +31,7 @@ export class DamageRoll {
         this.damageRolls.forEach((roll: DiceRoll) => {
             this.totalDamage += roll.totalResult;
         });
-        this.totalDamage += modifier;
+        this.totalDamage += isHalved ? Math.floor(modifier / 2) : modifier;
 
         this.modifier = modifier;
         this.damageType = damageType;

@@ -160,10 +160,13 @@ export class Monster extends GameEntity {
 
         return Math.max(1, (Math.min(6, this.min + bonusSlots)));
     }
-    
+
     regainEnergySlot() {
         const toRegain = Math.max(1, Math.floor(this.getWil() / 2));
         this.availableSlots = Math.min(this.getEnergySlots() - this.occupiedSlots, this.availableSlots + toRegain);
     }
 
+    getDifficulty(): number {
+        return this.getWil() + 8;
+    }
 }

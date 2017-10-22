@@ -421,7 +421,8 @@ export class BattleService {
             // The entities that have spent or lost energy slots this round will regain slots in the next one
             // Unless he has Iracundia on, or is Dead
             if (!entity.conditions.has(Condition.Dead) && !entity.activeAuras.has(AuraEffect.Iracundia) &&
-                entity.availableSlots < (entity.getEnergySlots() - entity.occupiedSlots)) {
+                (entity.availableSlots === 0 || turn.action === 'cas' || turn.quickSpell !== '' ||
+                    entity.availableSlots < (entity.getEnergySlots() - entity.occupiedSlots))) {
                 this.mustRegainSlots.set(entity, 1);
             }
         });
@@ -455,7 +456,7 @@ export class BattleService {
             // If the monster could cast a non-cure spell, he will do, or else he will attack
             let toDo: BattleTurn;
             const chanceToCast = 1 + ((entity.role === Role.Sorcerer) ? 3 :
-                (entity.role === Role.Boss) ? (new StandardDiceRoll(1, 3, -1)).totalResult : 1)
+                (entity.role === Role.Boss) ? 2 : 1)
             entity.spellsKnown.forEach((spell: Castable) => {
                 if ((entity.availableSlots >= spell.slotExpendend) &&
                     (quickSpellMemo !== 'Cure Wounds' && quickSpellMemo !== 'Medico') &&

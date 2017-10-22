@@ -58,7 +58,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getWilSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         false,
                         targets[0].name,
                         log);
@@ -113,7 +113,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getAgiSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -147,7 +147,7 @@ export class SpellService {
                     targets.forEach((target: GameEntity) => {
 
                         const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(),
-                            caster.getDifficultyClass(),
+                            caster.getDifficulty(),
                             false,
                             target.name,
                             log);
@@ -181,7 +181,7 @@ export class SpellService {
                     targets.forEach((target: GameEntity) => {
 
                         const savingThrow = new SavingThrow(targets[0].getAgiSavingThrow(),
-                            caster.getDifficultyClass(),
+                            caster.getDifficulty(),
                             false,
                             target.name,
                             log);
@@ -215,7 +215,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -252,7 +252,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -289,7 +289,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -342,7 +342,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -366,7 +366,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getWilSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -390,7 +390,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getWilSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -414,7 +414,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -438,7 +438,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -462,7 +462,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getWilSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -486,7 +486,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getWilSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -510,7 +510,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getWilSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);
@@ -533,7 +533,7 @@ export class SpellService {
                     log.addEntry(caster.name + ' casts ' + this.name);
 
                     const savingThrow = new SavingThrow(targets[0].getWilSavingThrow(),
-                        caster.getDifficultyClass(),
+                        caster.getDifficulty(),
                         targets[0].role === Role.Fighter && targets[0].level >= 6,
                         targets[0].name,
                         log);

@@ -414,4 +414,14 @@ export class Character extends GameEntity {
 
         return super.takeCondition(condition, rounds);
     }
+
+    getDifficulty(): number {
+        let diffModifier = 0;
+
+        if (this.weapon.powers.has(Power.OfMagic)) {
+            diffModifier += this.weapon.powers.get(Power.OfMagic);
+        }
+
+        return this.getWil() + diffModifier + 8;
+    }
 }

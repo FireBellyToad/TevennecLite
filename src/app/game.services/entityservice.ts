@@ -43,7 +43,7 @@ export class EntitiesService {
         lumionousOfTheEagle.set(Power.OfTheEagle, 2);
 
         const ofMagic = new Map<Power, number>();
-        lumionousOfTheEagle.set(Power.OfMagic, 1);
+        ofMagic.set(Power.OfMagic, 2);
 
         this.char = [
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Cleric,

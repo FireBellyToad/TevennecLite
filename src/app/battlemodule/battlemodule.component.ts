@@ -42,7 +42,7 @@ export class BattlemoduleComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.char = this.characterService.getCharacterByName('Dalvert');
+    this.char = this.characterService.getCharacterByName('Lissandra');
     this.mons = this.characterService.getMonsterByName('Horla');
   }
 

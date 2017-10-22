@@ -126,9 +126,7 @@ export abstract class GameEntity {
     abstract getAttackRoll(): DiceRoll;
     abstract getDamageRoll(): DamageRoll;
     abstract hasDoubleAttack(): boolean;
-    getDifficultyClass(): number {
-        return this.wil + 8;
-    }
+    abstract getDifficulty(): number;
 
     // Defense
 
