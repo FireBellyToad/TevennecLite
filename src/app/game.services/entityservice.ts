@@ -9,6 +9,7 @@ import { Weapon } from 'app/game.items/weapon';
 import { MonsterType } from 'app/game.enums/monstertype';
 import { Power } from 'app/game.enums/powers';
 import { ItemService } from 'app/game.services/itemservice';
+import { Mastery } from 'app/game.enums/mastery';
 
 @Injectable()
 export class EntitiesService {
@@ -30,6 +31,10 @@ export class EntitiesService {
         blessedOfTheBear.set(Power.OfTheBear, 1);
         blessedOfTheBear.set(Power.Blessed, 2);
 
+        const blessedOfTheDivinity = new Map<Power, number>();
+        blessedOfTheBear.set(Power.OfTheDivinity, 1);
+        blessedOfTheBear.set(Power.Blessed, 2);
+
         const destructiveOfPrecision = new Map<Power, number>();
         destructiveOfPrecision.set(Power.OfPrecision, 3);
         destructiveOfPrecision.set(Power.Destructive, 0);
@@ -44,6 +49,10 @@ export class EntitiesService {
 
         const ofMagic = new Map<Power, number>();
         ofMagic.set(Power.OfMagic, 2);
+
+        const blockingOfMagic = new Map<Power, number>();
+        blockingOfMagic.set(Power.OfMagic, 2);
+        blockingOfMagic.set(Power.Blocking, 2);
 
         this.char = [
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Cleric,
@@ -65,6 +74,11 @@ export class EntitiesService {
                 itemService.getMagicWeaponByName('Morningstar', destructiveOfPrecision),
                 itemService.getMagicArmorByName('Full plate', blessedOfTheBear), itemService.getShield(shieldPowers),
                 itemService.getRing(Power.OfPrecision, 2), itemService.getRing(Power.OfMeditation, 2),
+                this.spellService.getCharacterSpells()),
+            new Character('Emeric', 0, 0, 5, 4, 10, Role.Spellcaster, Talent.Cleric,
+                itemService.getMagicWeaponByName('Quarterstaff', blockingOfMagic),
+                itemService.getMagicArmorByName('Chain mail', blessedOfTheDivinity), itemService.getShield(shieldPowers),
+                itemService.getRing(Power.OfTheEagle, 2), itemService.getRing(Power.OfMeditation, 2),
                 this.spellService.getCharacterSpells()),
             new Character('Lissandra', 0, 0, 5, 4, 10, Role.Spellcaster, Talent.Luminous,
                 itemService.getMagicWeaponByName('Mace', ofMagic), itemService.getMagicArmorByName('Chain mail', blessedOfTheBear),
@@ -89,12 +103,12 @@ export class EntitiesService {
                 [this.spellService.getSpellByName('Fear')]),
             new Monster('Abomination', 4, 2, 2, 0, 5,
                 Role.Brute, Talent.Lethal, MonsterType.Native,
-                new Weapon('Tentacle', 1, 4, [WeaponType.OneHanded, WeaponType.Piercing]),
+                new Weapon('Tentacle', 1, 4, [WeaponType.OneHanded, WeaponType.Piercing], [Mastery.Maim]),
                 [this.spellService.getSpellByName('Maiming'),
                 this.spellService.getSpellByName('Bleed')]),
             new Monster('The Giant', 5, 4, 3, 2, 5,
                 Role.Boss, Talent.Big, MonsterType.Native,
-                new Weapon('Smash', 1, 6, [WeaponType.OneHanded, WeaponType.Bludgeoning]),
+                new Weapon('Smash', 1, 6, [WeaponType.OneHanded, WeaponType.Bludgeoning], [Mastery.Stun]),
                 [this.spellService.getSpellByName('Fear'), this.spellService.getSpellByName('Cure Wounds')]),
             new Monster('Succubus', 1, 3, 4, 4, 6,
                 Role.Sorcerer, Talent.Generic, MonsterType.LesserFoul,
@@ -106,19 +120,19 @@ export class EntitiesService {
                 itemService.getWeaponByName('Short sword'), [this.spellService.getSpellByName('Cure Wounds')]),
             new Monster('Death Giant', 10, 2, 2, 1, 9,
                 Role.Brute, Talent.Big, MonsterType.MajorUndead,
-                new Weapon('Smash', 1, 12, [WeaponType.OneHanded, WeaponType.Bludgeoning])),
+                new Weapon('Smash', 1, 12, [WeaponType.OneHanded, WeaponType.Bludgeoning], [Mastery.Stun])),
             new Monster('Lich', 2, 4, 8, 6, 10,
                 Role.Sorcerer, Talent.Generic, MonsterType.MajorUndead,
                 new Weapon('Deadly touch', 1, 4, [WeaponType.OneHanded, WeaponType.Piercing]),
                 this.spellService.getMonsterSpells()),
             new Monster('Boogeyman', 6, 6, 4, 2, 10,
                 Role.Brute, Talent.Quick, MonsterType.MajorFoul,
-                new Weapon('Claw', 1, 8, [WeaponType.OneHanded, WeaponType.Slashing]),
+                new Weapon('Claw', 1, 8, [WeaponType.OneHanded, WeaponType.Slashing], [Mastery.Maim]),
                 [this.spellService.getSpellByName('Fear'), this.spellService.getSpellByName('Cause Serious Wounds'),
                 this.spellService.getSpellByName('Suppress Aura')]),
             new Monster('Horla', 8, 8, 6, 8, 10,
                 Role.Boss, Talent.Quick, MonsterType.MajorFoul,
-                new Weapon('Claw', 1, 6, [WeaponType.OneHanded, WeaponType.Slashing]),
+                new Weapon('Claw', 1, 6, [WeaponType.OneHanded, WeaponType.Slashing], [Mastery.Maim]),
                 this.spellService.getMonsterSpells())];
     }
 

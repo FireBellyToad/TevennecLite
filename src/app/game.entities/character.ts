@@ -263,6 +263,16 @@ export class Character extends GameEntity {
         return 8 + maxAGi + this.armor.getArmorDefBonus() + spellsModifier - this.defPenalty;
     }
 
+    rollInitiative() {
+
+        this.currentInitiative.rollDice();
+
+        if (this.activeAuras.has(AuraEffect.Celeritas)) {
+            this.currentInitiative.totalResult += 3;
+            this.currentInitiative.modifier += 3;
+        }
+    }
+
     protected getSavingThrow(attribute: number): DiceRoll {
         let totalModifier = attribute;
 

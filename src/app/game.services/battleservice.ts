@@ -24,7 +24,7 @@ import { Power } from 'app/game.enums/powers';
 export class BattleService {
 
     private battleTimer;
-    private readonly timeToWait = 1250;
+    private readonly timeToWait = 1000;
     roundFinished = true;
     logger: Logger;
 
@@ -47,7 +47,7 @@ export class BattleService {
     }
 
     // Manage entity conditions
-    manageRoundStartEffect(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
+    private manageRoundStartEffect(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
 
 
         entitiesInBattle.forEach((entity: GameEntity) => {
@@ -64,8 +64,44 @@ export class BattleService {
                 if (aura === AuraEffect.Impulsus) {
                     entitiesInBattle.forEach((target: GameEntity) => {
                         if (target instanceof Monster) {
-                            target.takeDamage(entity.getWil(), DamageType.Light);
-                            this.logger.addDamageEntry(target.name, 'Impulsus', entity.getWil().toString());
+
+                            // Impulsus effect
+                            const savingThrow = new SavingThrow(target.getTouSavingThrow(),
+                                entity.getDifficulty(),
+                                false,
+                                target.name,
+                                this.logger);
+
+                            const damage = new DamageRoll(
+                                [{ numberOfDices: 1, dice: 4 }],
+                                Math.floor(entity.getWil() / 2),
+                                DamageType.Light,
+                                false,
+                                savingThrow.isSuccessful(),
+                                entity.talent === Talent.Luminous);
+
+                            const finaldamage = target.takeDamageFromRoll(damage);
+                            let resImmVulMessage;
+
+                            if (target.hasVulnerability(damage.damageType)) {
+                                resImmVulMessage = '*VULNERABLE*'
+                            }
+
+                            this.logger.addDamageEntry(target.name,
+                                'Impulsus',
+                                damage.toString(),
+                                finaldamage.toString(),
+                                resImmVulMessage);
+                        }
+                    });
+                } else if (aura === AuraEffect.Pharus) {
+                    entitiesInBattle.forEach((target: GameEntity) => {
+                        if (target instanceof Monster) {
+
+                            // Phaurs effect
+                            if (!target.takeCondition(Condition.Weakened, 1, true)) {
+                                this.logger.addEntry(target.name + ' cannot be Weakened');
+                            }
                         }
                     });
                 }
@@ -77,7 +113,7 @@ export class BattleService {
     }
 
     // Rolls initiative for all the entities and sorts the from higher to lower
-    rollRoundInitiative(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
+    private rollRoundInitiative(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
 
         entitiesInBattle.forEach((entity: GameEntity) => {
 
@@ -98,7 +134,7 @@ export class BattleService {
     }
 
     // Defines turn
-    doTurnsDefinition(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
+    private doTurnsDefinition(entitiesInBattle: GameEntity[], playerTurnAction: BattleTurn) {
 
         const turnActions = new Map<GameEntity, BattleTurn>();
         const monsterTargets = entitiesInBattle.filter(en => en instanceof Character);
@@ -119,7 +155,7 @@ export class BattleService {
     }
 
     // Resolve Turns actions
-    doResolveTurns(turnActions: Map<GameEntity, BattleTurn>) {
+    private doResolveTurns(turnActions: Map<GameEntity, BattleTurn>) {
 
         const entitiesHit: { target: GameEntity, attacker: GameEntity, spells: Castable, damage: DamageRoll, processed: boolean }[] = [];
 
@@ -247,6 +283,7 @@ export class BattleService {
                 hitEntry.target.attemptBlock()) {
 
                 this.logger.addEntry(hitEntry.target.name + ' blocked ' + hitEntry.attacker.name, LogEntry.COLOR_RED);
+                hitEntry.damage.totalDamage = 0;
 
                 // Thorny shield
                 if (hitEntry.target instanceof Character) {
@@ -321,7 +358,8 @@ export class BattleService {
     }
 
     // Post Damage routine
-    postDamageRoutine(hitEntry: { target: GameEntity, attacker: GameEntity, damage: DamageRoll, processed: boolean }, finalDamage: number) {
+    private postDamageRoutine(hitEntry: { target: GameEntity, attacker: GameEntity, damage: DamageRoll, processed: boolean },
+        finalDamage: number) {
 
         // Big Talent Feature
         if (hitEntry.attacker.talent === Talent.Big) {
@@ -343,7 +381,7 @@ export class BattleService {
         }
 
         // Fighter Role Feature
-        if ((hitEntry.attacker.role === Role.Fighter && hitEntry.attacker.level >= 4)) {
+        if (((hitEntry.attacker.role === Role.Fighter || hitEntry.attacker.role === Role.Brute) && hitEntry.attacker.level >= 4)) {
             hitEntry.attacker.weapon.masteries.forEach((mastery: Mastery, i: number, arr: Mastery[]) => {
                 switch (mastery) {
                     case Mastery.Maim: {

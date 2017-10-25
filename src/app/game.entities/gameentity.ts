@@ -151,9 +151,7 @@ export abstract class GameEntity {
 
     // Initiative
 
-    rollInitiative() {
-        this.currentInitiative.rollDice();
-    }
+    abstract rollInitiative();
 
     getCurrentInitiative(): DiceRoll {
         return this.currentInitiative;
@@ -312,6 +310,10 @@ export abstract class GameEntity {
             }
             case Condition.Paralyzed: {
                 this.setAgiPenalty(5 + this.agi);
+                break;
+            }
+            case Condition.Poisoned: {
+                this.setTouPenalty(2);
                 break;
             }
             case Condition.Weakened: {

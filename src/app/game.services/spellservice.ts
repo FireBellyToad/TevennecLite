@@ -30,6 +30,7 @@ export class SpellService {
             new AuraSpell('Consecratio', 4, 2, false, AuraEffect.Consecratio, log),
             new AuraSpell('Impulsus', 2, 1, false, AuraEffect.Impulsus, log),
             new AuraSpell('Iracundia', 3, 2, false, AuraEffect.Iracundia, log),
+            new AuraSpell('Pharus', 3, 2, false, AuraEffect.Pharus, log),
             {
                 name: 'Medico',
                 spellLevel: 1,
@@ -447,6 +448,30 @@ export class SpellService {
 
                         if (!targets[0].takeCondition(Condition.Ill, 15 - caster.getWil())) {
                             log.addEntry(targets[0].name + ' cannot be Ill');
+                        }
+                    }
+                }
+            }, {
+                name: 'Poison',
+                spellLevel: 1,
+                slotExpendend: 1,
+                isMonsterSpell: true,
+                cast: function (targets: GameEntity[], caster: GameEntity) {
+
+                    // The target becomes Poisoned, Tou save negates
+
+                    log.addEntry(caster.name + ' casts ' + this.name);
+
+                    const savingThrow = new SavingThrow(targets[0].getTouSavingThrow(),
+                        caster.getDifficulty(),
+                        targets[0].role === Role.Fighter && targets[0].level >= 6,
+                        targets[0].name,
+                        log);
+
+                    if (!savingThrow.isSuccessful()) {
+
+                        if (!targets[0].takeCondition(Condition.Poisoned, 2 + caster.getWil())) {
+                            log.addEntry(targets[0].name + ' cannot be Poisoned');
                         }
                     }
                 }

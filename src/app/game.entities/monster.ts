@@ -69,7 +69,7 @@ export class Monster extends GameEntity {
             levelModifier = Math.floor(this.level / 4);
         }
 
-        return 3 + levelModifier + Math.floor(this.agi / 2);
+        return 3 + levelModifier + Math.floor(this.agi / 2)  - this.atkPenalty;
     }
 
     getAttackRoll(): DiceRoll {
@@ -115,6 +115,13 @@ export class Monster extends GameEntity {
         return 8 + this.agi + levelModifier - this.defPenalty;
     }
 
+
+    rollInitiative() {
+
+        this.currentInitiative.rollDice();
+    }
+
+
     protected getSavingThrow(attribute: number) {
         let levelModifier = 0;
 
@@ -142,8 +149,8 @@ export class Monster extends GameEntity {
     // Override
     takeCondition(condition: Condition, rounds = 0, overrideUndeadImmunity = false): boolean {
         // Undeads are Immune to conditions, but sometimes this condition could be overridden
-        if ((this.monsterType !== MonsterType.LesserUndead &&
-            this.monsterType !== MonsterType.MajorUndead) || overrideUndeadImmunity) {
+        if (overrideUndeadImmunity || (this.monsterType !== MonsterType.LesserUndead &&
+            this.monsterType !== MonsterType.MajorUndead)) {
             return super.takeCondition(condition, rounds);
         }
 
