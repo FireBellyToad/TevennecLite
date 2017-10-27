@@ -20,10 +20,11 @@ export class ItemService {
             new Weapon('Unarmed', 1, 2, [WeaponType.OneHanded, WeaponType.Bludgeoning]),
             new Weapon('Mace', 1, 4, [WeaponType.OneHanded, WeaponType.Bludgeoning], [Mastery.Stun, Mastery.ImprovedStun]),
             new Weapon('Pitchfork', 1, 6, [WeaponType.TwoHanded, WeaponType.Piercing]),
-            new Weapon('Short sword', 1, 6, [WeaponType.OneHanded, WeaponType.Slashing], [Mastery.ImprovedCritical, Mastery.Bleed]),
+            new Weapon('Short sword', 1, 6, [WeaponType.OneHanded, WeaponType.Slashing], [Mastery.ImprovedCritical, Mastery.ImprovedBlock]),
             new Weapon('War hammer', 1, 6, [WeaponType.OneHanded, WeaponType.Bludgeoning], [Mastery.Stun, Mastery.ImprovedStun]),
             new Weapon('Quarterstaff', 1, 6, [WeaponType.TwoHanded, WeaponType.Bludgeoning], [Mastery.Block, Mastery.ImprovedBlock]),
             new Weapon('Long sword', 1, 8, [WeaponType.OneHanded, WeaponType.Slashing], [Mastery.Maim, Mastery.Bleed]),
+            new Weapon('Rapier', 1, 8, [WeaponType.OneHanded, WeaponType.Piercing], [Mastery.Bleed, Mastery.ImprovedBlock]),
             new Weapon('Morningstar', 1, 8, [WeaponType.OneHanded, WeaponType.Bludgeoning], [Mastery.Stun, Mastery.ImprovedStun]),
             new Weapon('Great sword', 1, 12, [WeaponType.TwoHanded, WeaponType.Slashing], [Mastery.Maim, Mastery.Stun]),
         ];

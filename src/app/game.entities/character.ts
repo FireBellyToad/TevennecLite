@@ -100,7 +100,7 @@ export class Character extends GameEntity {
     getTou(): number {
         let touBonus = 0;
 
-        if (this.armor.powers.has(Power.OfTheBear)) {
+        if (this.armor && this.armor.powers.has(Power.OfTheBear)) {
             touBonus += 1;
         }
 
@@ -115,7 +115,7 @@ export class Character extends GameEntity {
     getAgi(): number {
         let agiBonus = 0;
 
-        if (this.weapon.powers.has(Power.OfTheCat)) {
+        if (this.weapon && this.weapon.powers.has(Power.OfTheCat)) {
             agiBonus += 1;
         }
 
@@ -129,7 +129,7 @@ export class Character extends GameEntity {
     getMin(): number {
         let minBonus = 0;
 
-        if (this.armor.powers.has(Power.OfTheFox)) {
+        if (this.armor && this.armor.powers.has(Power.OfTheFox)) {
             minBonus += 1;
         }
 
@@ -144,7 +144,7 @@ export class Character extends GameEntity {
     getWil(): number {
         let wilBonus = 0;
 
-        if (this.weapon.powers.has(Power.OfTheEagle)) {
+        if (this.weapon && this.weapon.powers.has(Power.OfTheEagle)) {
             wilBonus += 1;
         }
 
@@ -221,8 +221,16 @@ export class Character extends GameEntity {
         // Check if attack roll was a critical hit
         let isCritical = false;
 
-        if (this.lastAttackRoll !== undefined) {
-            isCritical = this.lastAttackRoll.naturalResults[0] + this.getMin() >= 20;
+        if (this.lastAttackRoll) {
+            let criticalModifier = Math.floor(this.getMin() / 2);
+
+            if (this.weapon.powers.has(Power.Efficient)) {
+                criticalModifier += this.weapon.powers.get(Power.Efficient);
+            } else if (this.weapon.powers.has(Power.OfEfficiency)) {
+                criticalModifier += this.weapon.powers.get(Power.OfEfficiency);
+            }
+
+            isCritical = this.lastAttackRoll.naturalResults[0] + criticalModifier >= 20;
         }
 
         let damageType = this.weapon.damageType;
@@ -256,7 +264,7 @@ export class Character extends GameEntity {
         // Spells Modifier
         let spellsModifier = 0
 
-        if (this.activeAuras.has(AuraEffect.Scutum)) {
+        if (this.activeAuras.has(AuraEffect.Difesio)) {
             spellsModifier = 3;
         }
 
@@ -270,6 +278,11 @@ export class Character extends GameEntity {
         if (this.activeAuras.has(AuraEffect.Celeritas)) {
             this.currentInitiative.totalResult += 3;
             this.currentInitiative.modifier += 3;
+        }
+
+        if (this.conditions.has(Condition.Slowed)) {
+            this.currentInitiative.totalResult -= 3;
+            this.currentInitiative.modifier -= 3;
         }
     }
 
@@ -310,29 +323,35 @@ export class Character extends GameEntity {
     }
 
     attemptBlock(): boolean {
-        let blockValue = this.getAgi() + 3;
+
+        let blockValue = 0;
 
         // Duelist Talent feature
         if (this.talent === Talent.Duelist) {
             blockValue = (this.getAgi() * 2) + 3;
+            // Fighter Role Feature
+            if (this.weapon.masteries.includes(Mastery.ImprovedBlock) &&
+                this.role === Role.Fighter && this.level >= 10) {
+                blockValue += 2;
+            }
+        } else if (this.activeAuras.has(AuraEffect.Scutum)) {
+            blockValue = (this.getAgi() + this.getWil()) + 3;
+        } else if (this.shield ||
+            (this.weapon.masteries.includes(Mastery.Block) && this.role === Role.Fighter && this.level >= 4)) {
+            blockValue = this.getAgi() + 3
+
+            // Fighter Role Feature
+            if (this.weapon.masteries.includes(Mastery.ImprovedBlock) &&
+                this.role === Role.Fighter && this.level >= 10) {
+                blockValue += 2;
+            }
+            // Item Bonus
+            if (this.shield && this.shield.powers.has(Power.Blocking)) {
+                blockValue += this.shield.powers.get(Power.Blocking);
+            }
         }
 
-        // Fighter Role Feature
-        if (this.weapon.masteries.includes(Mastery.ImprovedBlock) &&
-            this.role === Role.Fighter && this.level >= 10) {
-            blockValue += 2;
-        }
-
-        // Item Bonus
-        if (this.shield && this.shield.powers.has(Power.Blocking)) {
-            blockValue += this.shield.powers.get(Power.Blocking);
-        }
-
-
-        return (this.shield || this.talent === Talent.Duelist ||
-            (this.weapon.masteries.includes(Mastery.Block) &&
-                this.role === Role.Fighter && this.level >= 4)) &&
-            new StandardDiceRoll(1, 20, blockValue).totalResult >= 20;
+        return blockValue !== 0 && new StandardDiceRoll(1, 20, blockValue).totalResult >= 20;
     }
 
     canBeBlocked(): boolean {
@@ -353,7 +372,7 @@ export class Character extends GameEntity {
         }
 
 
-        return Math.max(1, (Math.min(6, this.min + bonusSlots)));
+        return Math.max(1, (Math.min(this.slotLimit, 1 + this.getMin() + bonusSlots)));
     }
 
     // Override

@@ -9,5 +9,7 @@ export enum Condition {
     Paralyzed,
     Poisoned,
     Stunned,
-    Weakened
+    Weakened,
+    Far,
+    Slowed
 }

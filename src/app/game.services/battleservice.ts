@@ -287,7 +287,7 @@ export class BattleService {
 
                 // Thorny shield
                 if (hitEntry.target instanceof Character) {
-                    if (hitEntry.target.shield.powers.has(Power.Thorny)) {
+                    if (hitEntry.target.shield && hitEntry.target.shield.powers.has(Power.Thorny)) {
 
                         const dmg = new DamageRoll([{ numberOfDices: 1, dice: 4 }], 0, DamageType.Supernatural);
                         hitEntry.attacker.takeDamageFromRoll(dmg);

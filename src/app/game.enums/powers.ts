@@ -10,6 +10,8 @@ export enum Power {
     Quick,
     OfMagic,
     Infused,
+    Efficient,
+    OfEfficiency,
 
     // Armor Powers
     Defensive,

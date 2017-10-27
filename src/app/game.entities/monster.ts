@@ -94,8 +94,8 @@ export class Monster extends GameEntity {
 
         let isCritical = false;
 
-        if (this.lastAttackRoll !== undefined) {
-            isCritical = this.lastAttackRoll.naturalResults[0] + this.min >= 20;
+        if (this.lastAttackRoll) {
+            isCritical = this.lastAttackRoll.naturalResults[0] + Math.floor(this.getMin() / 2) >= 20;
         }
 
         return new DamageRoll([{ numberOfDices: 1, dice: this.weapon.weaponDice }],
@@ -119,6 +119,11 @@ export class Monster extends GameEntity {
     rollInitiative() {
 
         this.currentInitiative.rollDice();
+        
+        if (this.conditions.has(Condition.Slowed)) {
+            this.currentInitiative.totalResult -= 3;
+            this.currentInitiative.modifier -= 3;
+        }
     }
 
 
@@ -165,7 +170,7 @@ export class Monster extends GameEntity {
             bonusSlots += 1;
         }
 
-        return Math.max(1, (Math.min(6, this.min + bonusSlots)));
+        return Math.max(1, (Math.min(this.slotLimit, 1 + this.getMin() + bonusSlots)));
     }
 
     regainEnergySlot() {

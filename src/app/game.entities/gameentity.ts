@@ -15,6 +15,8 @@ import { Mastery } from 'app/game.enums/mastery';
 
 export abstract class GameEntity {
 
+    protected readonly slotLimit = 10;
+
     // Attributes
     protected tou: number;
     protected agi: number;
@@ -223,7 +225,8 @@ export abstract class GameEntity {
 
 
     cannotAct(): boolean {
-        return this.conditions.has(Condition.Dead) ||
+        return this.conditions.has(Condition.Far) ||
+            this.conditions.has(Condition.Dead) ||
             this.conditions.has(Condition.Stunned) ||
             this.conditions.has(Condition.Paralyzed);
     }
@@ -241,7 +244,7 @@ export abstract class GameEntity {
 
     // Energy Slots, return false if can't cast
 
-    abstract getEnergySlots(): number ;
+    abstract getEnergySlots(): number;
     canCast(spellName: string): boolean {
         return (this.spellsKnown.has(spellName) && this.availableSlots >= this.spellsKnown.get(spellName).slotExpendend)
     }

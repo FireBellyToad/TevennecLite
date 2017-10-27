@@ -1,11 +1,12 @@
 export enum AuraEffect {
     Arma,
-    Scutum,
+    Difesio,
     Impulsus,
     Consecratio,
     Fortitudo,
     Celeritas,
     Pharus,
     Lux,
-    Iracundia
+    Iracundia,
+    Scutum
 }

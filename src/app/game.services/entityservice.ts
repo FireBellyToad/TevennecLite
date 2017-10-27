@@ -32,8 +32,8 @@ export class EntitiesService {
         blessedOfTheBear.set(Power.Blessed, 2);
 
         const blessedOfTheDivinity = new Map<Power, number>();
-        blessedOfTheBear.set(Power.OfTheDivinity, 1);
-        blessedOfTheBear.set(Power.Blessed, 2);
+        blessedOfTheDivinity.set(Power.OfTheDivinity, 1);
+        blessedOfTheDivinity.set(Power.Blessed, 2);
 
         const destructiveOfPrecision = new Map<Power, number>();
         destructiveOfPrecision.set(Power.OfPrecision, 3);
@@ -47,6 +47,10 @@ export class EntitiesService {
         lumionousOfTheEagle.set(Power.Luminous, 1);
         lumionousOfTheEagle.set(Power.OfTheEagle, 2);
 
+        const lumionousOfEfficiency = new Map<Power, number>();
+        lumionousOfEfficiency.set(Power.Luminous, 1);
+        lumionousOfEfficiency.set(Power.OfEfficiency, 2);
+
         const ofMagic = new Map<Power, number>();
         ofMagic.set(Power.OfMagic, 2);
 
@@ -58,8 +62,9 @@ export class EntitiesService {
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Cleric,
                 itemService.getWeaponByName('Pitchfork')),
             new Character('Tulpin', 1, 5, 1, 0, 10, Role.Fighter, Talent.Duelist,
-                itemService.getMagicWeaponByName('Short sword', precise),
-                itemService.getMagicArmorByName('Chain mail', blessedOfTheBear)),
+                itemService.getMagicWeaponByName('Rapier', lumionousOfTheEagle),
+                itemService.getMagicArmorByName('Chain mail', blessedOfTheBear), null,
+                itemService.getRing(Power.OfTheFox, 1), itemService.getRing(Power.OfBlessing, 2)),
             new Character('Regrell', 4, 3, 3, 1, 10, Role.Fighter, Talent.Mercenary,
                 itemService.getMagicWeaponByName('Great sword', destructiveOfPrecision),
                 itemService.getMagicArmorByName('Full plate', blessedOfTheBear),

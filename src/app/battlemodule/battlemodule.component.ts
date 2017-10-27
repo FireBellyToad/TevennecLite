@@ -15,6 +15,7 @@ import { SpellService } from 'app/game.services/spellservice';
 import { EntitiesService } from 'app/game.services/entityservice';
 import { BattleService } from 'app/game.services/battleservice';
 import { BattleTurn } from 'app/game.utils/battleturn';
+import { Condition } from 'app/game.enums/conditions';
 
 @Component({
   selector: 'app-battlemodule',
@@ -42,8 +43,9 @@ export class BattlemoduleComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.char = this.characterService.getCharacterByName('Emeric');
+    this.char = this.characterService.getCharacterByName('Tulpin');
     this.mons = this.characterService.getMonsterByName('Boogeyman');
+    this.mons.takeCondition(Condition.Far, 1, true);
   }
 
   startRound(playerTurnAction: BattleTurn) {

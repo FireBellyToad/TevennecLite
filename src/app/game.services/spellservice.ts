@@ -24,13 +24,14 @@ export class SpellService {
         this.spells = [
             new AuraSpell('Arma', 2, 1, false, AuraEffect.Arma, log),
             new AuraSpell('Lux', 1, 1, false, AuraEffect.Lux, log),
-            new AuraSpell('Scutum', 3, 2, false, AuraEffect.Scutum, log),
+            new AuraSpell('Difesio', 3, 2, false, AuraEffect.Difesio, log),
             new AuraSpell('Celeritas', 3, 2, false, AuraEffect.Celeritas, log),
             new AuraSpell('Fortitudo', 4, 2, false, AuraEffect.Fortitudo, log),
             new AuraSpell('Consecratio', 4, 2, false, AuraEffect.Consecratio, log),
             new AuraSpell('Impulsus', 2, 1, false, AuraEffect.Impulsus, log),
             new AuraSpell('Iracundia', 3, 2, false, AuraEffect.Iracundia, log),
             new AuraSpell('Pharus', 3, 2, false, AuraEffect.Pharus, log),
+            new AuraSpell('Scutum', 2, 1, false, AuraEffect.Scutum, log),
             {
                 name: 'Medico',
                 spellLevel: 1,
@@ -54,7 +55,7 @@ export class SpellService {
                 isMonsterSpell: false,
                 cast: function (targets: GameEntity[], caster: GameEntity) {
 
-                    // The target becomes Paralized, Wil Negates
+                    // The target becomes Paralized, on a Successful Wil becomes Slowed
 
                     log.addEntry(caster.name + ' casts ' + this.name);
 
@@ -68,6 +69,11 @@ export class SpellService {
 
                         if (!targets[0].takeCondition(Condition.Paralyzed, 2)) {
                             log.addEntry(targets[0].name + ' cannot be Paralyzed');
+                        }
+                    } else{
+                        
+                        if (!targets[0].takeCondition(Condition.Slowed, 2)) {
+                            log.addEntry(targets[0].name + ' cannot be Slowed');
                         }
                     }
                 }
@@ -134,6 +140,44 @@ export class SpellService {
                             dmg.toString(),
                             finalDamage.toString(),
                             resImmVulMessage);
+                    }
+                }
+            }, {
+                name: 'Radius',
+                spellLevel: 3,
+                slotExpendend: 2,
+                isMonsterSpell: false,
+                cast: function (targets: GameEntity[], caster: GameEntity) {
+
+                    // Target takes 1d10+(Wil) light damage,TOU negates Maim
+                    log.addEntry(caster.name + ' casts ' + this.name);
+
+                    const dmg = new DamageRoll([{ numberOfDices: 1, dice: 10 }], caster.getWil(), DamageType.Light, false,
+                        false, caster.talent === Talent.Luminous);
+
+                    const finalDamage = targets[0].takeDamageFromRoll(dmg);
+
+                    let resImmVulMessage = '';
+                    if (targets[0].hasVulnerability(dmg.damageType)) {
+                        resImmVulMessage = '*VULNERABLE*'
+                    }
+                    log.addDamageEntry(targets[0].name,
+                        caster.name,
+                        dmg.toString(),
+                        finalDamage.toString(),
+                        resImmVulMessage);
+
+                    const savingThrow = new SavingThrow(targets[0].getAgiSavingThrow(),
+                        caster.getDifficulty(),
+                        targets[0].role === Role.Fighter && targets[0].level >= 6,
+                        targets[0].name,
+                        log);
+
+                    if (!savingThrow.isSuccessful()) {
+
+                        if (!targets[0].takeCondition(Condition.Maimed, -1)) {
+                            log.addEntry(targets[0].name + ' cannot be Maimed');
+                        }
                     }
                 }
             }, {
