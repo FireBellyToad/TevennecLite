@@ -13,6 +13,8 @@ export class BattleheaderComponent implements OnInit {
   @Input() buttonDisabled = false;
   @Input() currentChar: Character;
   @Output() startRound = new EventEmitter<BattleTurn>();
+  @Output() resetChar = new EventEmitter<boolean>();
+  @Output() resetMon = new EventEmitter<boolean>();
   spellList: string[];
   characterService: EntitiesService;
   numberOfResets = 0;
@@ -56,9 +58,12 @@ export class BattleheaderComponent implements OnInit {
     this.startRound.emit({ action: action, spell: spell, quickSpell: quickSpell, auraToRelease: auraToRelease, target: undefined });
   }
 
-  resetChar() {
+  resetCharacter() {
     this.numberOfResets++;
-    this.currentChar.actualHP = this.currentChar.maxHp;
-    this.currentChar.conditions.clear();
+    this.resetChar.emit(true);
+  }
+
+  resetMonster() {
+    this.resetMon.emit(true);
   }
 }

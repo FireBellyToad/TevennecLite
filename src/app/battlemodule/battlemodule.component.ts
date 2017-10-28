@@ -57,4 +57,20 @@ export class BattlemoduleComponent implements OnInit {
     this.battleService.startRound(this.roundNumber, entitiesInBattle, playerTurnAction);
 
   }
+
+  setCharacter() {
+    this.char.actualHP = this.char.maxHp;
+    this.char.conditions.clear();
+    this.char.activeAuras.clear();
+    this.char.occupiedSlots = 0;
+    this.char.availableSlots = this.char.getEnergySlots();
+  }
+
+  setMonster() {
+    this.mons.actualHP = this.char.maxHp;
+    this.mons.conditions.clear();
+    this.mons.activeAuras.clear();
+    this.mons.occupiedSlots = 0;
+    this.mons.availableSlots = this.mons.getEnergySlots();
+  }
 }

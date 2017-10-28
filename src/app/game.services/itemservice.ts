@@ -31,8 +31,11 @@ export class ItemService {
 
         this.armors = [
             new Armor('Unarmored', 0, ArmorType.Light),
+            new Armor('Padded armor', 2, ArmorType.Light),
             new Armor('Leather armor', 3, ArmorType.Light),
             new Armor('Chain mail', 4, ArmorType.Light),
+            new Armor('Splint mail', 6, ArmorType.Heavy),
+            new Armor('Banded mail', 7, ArmorType.Heavy),
             new Armor('Full plate', 8, ArmorType.Heavy),
 
         ];

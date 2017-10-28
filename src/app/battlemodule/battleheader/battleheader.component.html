@@ -8,9 +8,13 @@
           [disabled]="buttonDisabled"
           (click) = "startBattleRound(actionToTake.value,spellToCast.value,quickSpellToCast.value,auraToRelease.value)">Start round</button>
         <button 
+          class="btn btn-warning"
+          [disabled]="buttonDisabled"
+          (click) = "resetCharacter()">Reset Character</button>
+        <button 
           class="btn btn-danger"
           [disabled]="buttonDisabled"
-          (click) = "resetChar()">Reset Character Life</button>
+          (click) = "resetMonster()">Reset Monster</button>
         <p>Reset times: {{numberOfResets}}</p>
       </div>
         

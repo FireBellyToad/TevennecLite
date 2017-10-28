@@ -3,7 +3,9 @@
       <app-battleheader
       [currentChar] = "char"
       [buttonDisabled] = "!battleService.roundFinished"
-      (startRound) = "startRound($event)"></app-battleheader>
+      (startRound) = "startRound($event)"
+      (resetChar) = "setCharacter()"
+      (resetMon) = "setMonster()"></app-battleheader>
     </div>
 </div>
 <div class="row">

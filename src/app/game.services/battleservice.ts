@@ -493,8 +493,7 @@ export class BattleService {
 
             // If the monster could cast a non-cure spell, he will do, or else he will attack
             let toDo: BattleTurn;
-            const chanceToCast = 1 + ((entity.role === Role.Sorcerer) ? 3 :
-                (entity.role === Role.Boss) ? 2 : 1)
+            const chanceToCast = 1 + ((entity.role === Role.Sorcerer) ? 3 : 2)
             entity.spellsKnown.forEach((spell: Castable) => {
                 if ((entity.availableSlots >= spell.slotExpendend) &&
                     (quickSpellMemo !== 'Cure Wounds' && quickSpellMemo !== 'Medico') &&
