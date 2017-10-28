@@ -361,20 +361,8 @@ export class BattleService {
     private postDamageRoutine(hitEntry: { target: GameEntity, attacker: GameEntity, damage: DamageRoll, processed: boolean },
         finalDamage: number) {
 
-        // Big Talent Feature
-        if (hitEntry.attacker.talent === Talent.Big) {
-            const savingThrow = new SavingThrow(hitEntry.target.getTouSavingThrow(),
-                finalDamage,
-                hitEntry.target.role === Role.Fighter && hitEntry.target.level >= 6,
-                hitEntry.target.name,
-                this.logger);
-
-            if (!savingThrow.isSuccessful()) {
-
-                hitEntry.target.takeCondition(Condition.Stunned, 1);
-            }
-        } else if (hitEntry.attacker.talent === Talent.Lethal) {
-            // Lethal Talent Feature
+        // Lethal Talent Feature
+        if (hitEntry.attacker.talent === Talent.Lethal) {
             const random = new StandardDiceRoll(1, hitEntry.attacker.spellsKnown.size);
             const spellsTocast = Array.from(hitEntry.attacker.spellsKnown.values());
             spellsTocast[random.totalResult - 1].cast([hitEntry.target], hitEntry.attacker);

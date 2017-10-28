@@ -60,7 +60,7 @@ export class EntitiesService {
 
         this.char = [
             new Character('Bill', 2, 1, -1, 0, 1, Role.Spellcaster, Talent.Cleric,
-                itemService.getWeaponByName('Pitchfork')),
+                itemService.getWeaponByName('Pitchfork'), itemService.getArmorByName('Unarmored')),
             new Character('Tulpin', 1, 5, 1, 0, 10, Role.Fighter, Talent.Duelist,
                 itemService.getMagicWeaponByName('Rapier', lumionousOfTheEagle),
                 itemService.getMagicArmorByName('Chain mail', blessedOfTheBear), null,
@@ -98,7 +98,7 @@ export class EntitiesService {
                 [this.spellService.getSpellByName('Cause Wounds')]),
             new Monster('Ogre', 5, 2, 0, 0, 4,
                 Role.Brute, Talent.Big, MonsterType.LesserFoul,
-                new Weapon('Smash', 1, 6, [WeaponType.OneHanded, WeaponType.Bludgeoning])),
+                new Weapon('Smash', 1, 6, [WeaponType.OneHanded, WeaponType.Bludgeoning], [Mastery.Stun])),
             new Monster('Rabid Dog', 0, -2, -2, -2, 1,
                 Role.Brute, Talent.Generic, MonsterType.Native,
                 new Weapon('Bite', 1, 2, [WeaponType.OneHanded, WeaponType.Piercing])),
