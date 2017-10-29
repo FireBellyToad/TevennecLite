@@ -65,7 +65,7 @@ export class EntitiesService {
                 itemService.getMagicWeaponByName('Rapier', lumionousOfTheEagle),
                 itemService.getMagicArmorByName('Chain mail', blessedOfTheBear), null,
                 itemService.getRing(Power.OfTheFox, 1), itemService.getRing(Power.OfBlessing, 2)),
-            new Character('Regrell', 4, 3, 3, 1, 10, Role.Fighter, Talent.Mercenary,
+            new Character('Regrell', 3, 2, 4, 0, 10, Role.Fighter, Talent.Mercenary,
                 itemService.getMagicWeaponByName('Great sword', destructiveOfPrecision),
                 itemService.getMagicArmorByName('Full plate', blessedOfTheBear),
                 null, itemService.getRing(Power.OfPrecision, 2), itemService.getRing(Power.OfBlessing, 2),

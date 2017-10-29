@@ -297,16 +297,16 @@ export class Character extends GameEntity {
 
         // Armor Bonus
         if (this.armor.powers.has(Power.Blessed)) {
-            totalModifier += 1;
+            totalModifier += 2;
         } else if (this.armor.powers.has(Power.OfBlessing)) {
-            totalModifier += 1;
+            totalModifier += 2;
         }
 
         // Rings bonus
         if (this.leftRing && this.leftRing.powers.has(Power.OfBlessing)) {
-            totalModifier += 1;
+            totalModifier += 2;
         } else if (this.rightRing && this.rightRing.powers.has(Power.OfBlessing)) {
-            totalModifier += 1;
+            totalModifier += 2;
         }
 
         // Check for Consecratio Spell Effect
