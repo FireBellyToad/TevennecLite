@@ -43,8 +43,8 @@ export class BattlemoduleComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.char = this.characterService.getCharacterByName('Bill');
-    this.mons = this.characterService.getMonsterByName('Ogre');
+    this.char = this.characterService.getCharacterByName('Raast');
+    this.mons = this.characterService.getMonsterByName('Horla');
     this.mons.takeCondition(Condition.Far, 1, true);
   }
 

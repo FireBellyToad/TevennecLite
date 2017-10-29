@@ -40,8 +40,8 @@ export class EntitiesService {
         destructiveOfPrecision.set(Power.Destructive, 0);
 
         const shieldPowers = new Map<Power, number>();
-        shieldPowers.set(Power.Blocking, 3);
-        shieldPowers.set(Power.OfFirmness, 0);
+        shieldPowers.set(Power.Blocking, 1);
+        // shieldPowers.set(Power.OfFirmness, 0);
 
         const lumionousOfTheEagle = new Map<Power, number>();
         lumionousOfTheEagle.set(Power.Luminous, 1);
@@ -70,11 +70,16 @@ export class EntitiesService {
                 itemService.getMagicArmorByName('Full plate', blessedOfTheBear),
                 null, itemService.getRing(Power.OfPrecision, 2), itemService.getRing(Power.OfBlessing, 2),
                 this.spellService.getCharacterSpells(2)),
-            new Character('Sir Matheus', 3, 2, 3, 0, 10, Role.Fighter, Talent.Paladin,
-                itemService.getMagicWeaponByName('Long sword', lumionousOfTheEagle),
+            new Character('Raast', 3, 3, 2, 0, 10, Role.Fighter, Talent.Corrupted,
+                itemService.getMagicWeaponByName('Great sword', destructiveOfPrecision),
                 itemService.getMagicArmorByName('Full plate', blessedOfTheBear),
+                null, itemService.getRing(Power.OfPrecision, 2), itemService.getRing(Power.OfBlessing, 2),
+                this.spellService.getCharacterSpells(1)),
+            new Character('Sir Matheus', 2, 2, 2, 0, 6, Role.Fighter, Talent.Paladin,
+                itemService.getMagicWeaponByName('Long sword', precise),
+                itemService.getMagicArmorByName('Splint mail'),
                 itemService.getShield(shieldPowers),
-                null, null, this.spellService.getCharacterSpells(3)),
+                null, null, this.spellService.getCharacterSpells(2)),
             new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
                 itemService.getMagicWeaponByName('Morningstar', destructiveOfPrecision),
                 itemService.getMagicArmorByName('Full plate', blessedOfTheBear), itemService.getShield(shieldPowers),
@@ -118,7 +123,8 @@ export class EntitiesService {
             new Monster('Succubus', 1, 3, 4, 4, 6,
                 Role.Sorcerer, Talent.Generic, MonsterType.LesserFoul,
                 new Weapon('Claw', 1, 4, [WeaponType.OneHanded, WeaponType.Slashing]),
-                [this.spellService.getSpellByName('Cause Serious Wounds'),
+                [this.spellService.getSpellByName('Bleed'),
+                this.spellService.getSpellByName('Cause Serious Wounds'),
                 this.spellService.getSpellByName('Greater Mind Wave')]),
             new Monster('Risen Soldier', 4, 4, 2, 2, 7,
                 Role.Brute, Talent.Trained, MonsterType.MajorUndead,

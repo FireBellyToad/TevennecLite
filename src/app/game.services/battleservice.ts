@@ -167,7 +167,7 @@ export class BattleService {
             if (!entity.cannotAct()) {
 
                 // If confused, on a 33% damages himself instead of acting
-                if (entity.conditions.has(Condition.Confused) && (new StandardDiceRoll(1, 3).totalResult === 1)) {
+                if (entity.conditions.has(Condition.Confused) && (new StandardDiceRoll(1, 4).totalResult === 1)) {
 
                     const dmg = new DamageRoll([{ numberOfDices: 1, dice: 4 }], 0, DamageType.Untyped);
                     entity.takeDamageFromRoll(dmg);
@@ -354,6 +354,17 @@ export class BattleService {
 
         if (canCast) {
             spellTocast.cast([turn.target], entity);
+
+            // Corrupted talent feature
+
+            if (entity.talent === Talent.Corrupted) {
+                entity.takeDamage(spellTocast.spellLevel, DamageType.Light);
+
+                this.logger.addDamageEntry(
+                    entity.name,
+                    ' the spell ',
+                    spellTocast.spellLevel.toString());
+            }
         }
     }
 

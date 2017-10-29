@@ -53,11 +53,6 @@ export class Character extends GameEntity {
             this.actualHP += 3;
         }
 
-        // Corrupted Talent Feature
-        if (this.talent === Talent.Corrupted) {
-            this.resistances.push(DamageType.Darkness);
-        }
-
         // Armor Competences
         this.armorCompetences.push(ArmorType.Light);
 
@@ -228,6 +223,10 @@ export class Character extends GameEntity {
                 criticalModifier += this.weapon.powers.get(Power.Efficient);
             } else if (this.weapon.powers.has(Power.OfEfficiency)) {
                 criticalModifier += this.weapon.powers.get(Power.OfEfficiency);
+            }
+
+            if (this.talent === Talent.Mercenary) {
+                criticalModifier += 1;
             }
 
             isCritical = this.lastAttackRoll.naturalResults[0] + criticalModifier >= 20;
@@ -415,6 +414,12 @@ export class Character extends GameEntity {
             }
         }
 
+        // Corrupted Talent Feature
+        if (this.talent === Talent.Corrupted && !this.resistances.includes(DamageType.Darkness)) {
+            this.resistances.push(DamageType.Darkness);
+        }
+
+
 
     }
 
@@ -449,6 +454,10 @@ export class Character extends GameEntity {
 
         if (this.weapon.powers.has(Power.OfMagic)) {
             diffModifier += this.weapon.powers.get(Power.OfMagic);
+        }
+
+        if (this.talent === Talent.Cleric) {
+            diffModifier += 1;
         }
 
         return this.getWil() + diffModifier + 8;

@@ -70,8 +70,7 @@ export class SpellService {
                         if (!targets[0].takeCondition(Condition.Paralyzed, 2)) {
                             log.addEntry(targets[0].name + ' cannot be Paralyzed');
                         }
-                    } else{
-                        
+                    } else {
                         if (!targets[0].takeCondition(Condition.Slowed, 2)) {
                             log.addEntry(targets[0].name + ' cannot be Slowed');
                         }
@@ -366,10 +365,10 @@ export class SpellService {
                 isMonsterSpell: true,
                 cast: function (targets: GameEntity[], caster: GameEntity) {
 
-                    // The target gains 1d4+(Wil) hp
+                    // The target gains 1d8+(Wil/2) hp
                     log.addEntry(caster.name + ' casts ' + this.name);
 
-                    const cureRoll = new StandardDiceRoll(1, 4, caster.getWil());
+                    const cureRoll = new StandardDiceRoll(1, 8, Math.floor(caster.getWil() / 2));
 
                     caster.gainHP(cureRoll.totalResult);
 
