@@ -24,6 +24,8 @@ export class Monster extends GameEntity {
 
         super(name, tou, agi, min, wil, level, role, talent, spells);
 
+        this.currentInitiative = new StandardDiceRoll(1, 20, this.agi);
+
         // Boss Role Feature
         if (this.role === Role.Boss) {
             this.maxHp += 3 * this.level;
@@ -69,7 +71,7 @@ export class Monster extends GameEntity {
             levelModifier = Math.floor(this.level / 4);
         }
 
-        return 3 + levelModifier + Math.floor(this.agi / 2)  - this.atkPenalty;
+        return 3 + levelModifier + Math.floor(this.agi / 2) - this.atkPenalty;
     }
 
     getAttackRoll(): DiceRoll {
@@ -109,7 +111,7 @@ export class Monster extends GameEntity {
 
         // Brute and Boss Role Feature
         if (this.role === Role.Brute || this.role === Role.Boss) {
-            levelModifier = Math.floor(this.level / 3);
+            levelModifier = Math.floor(this.level / 4);
         }
 
         return 8 + this.agi + levelModifier - this.defPenalty;
@@ -119,7 +121,7 @@ export class Monster extends GameEntity {
     rollInitiative() {
 
         this.currentInitiative.rollDice();
-        
+
         if (this.conditions.has(Condition.Slowed)) {
             this.currentInitiative.totalResult -= 3;
             this.currentInitiative.modifier -= 3;
@@ -132,7 +134,7 @@ export class Monster extends GameEntity {
 
         // Brute and Boss Role Feature
         if (this.role === Role.Brute || this.role === Role.Boss) {
-            levelModifier += Math.floor(this.level / 5);
+            levelModifier += Math.floor(this.level / 4);
         }
 
         return new StandardDiceRoll(1, 20, attribute + levelModifier);
@@ -154,8 +156,9 @@ export class Monster extends GameEntity {
     // Override
     takeCondition(condition: Condition, rounds = 0, overrideUndeadImmunity = false): boolean {
         // Undeads are Immune to conditions, but sometimes this condition could be overridden
-        if (overrideUndeadImmunity || (this.monsterType !== MonsterType.LesserUndead &&
-            this.monsterType !== MonsterType.MajorUndead)) {
+        if (overrideUndeadImmunity ||
+            condition === Condition.Far ||
+            (this.monsterType !== MonsterType.LesserUndead && this.monsterType !== MonsterType.MajorUndead)) {
             return super.takeCondition(condition, rounds);
         }
 

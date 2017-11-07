@@ -1,7 +1,7 @@
 import { Item } from 'app/game.items/item';
 import { Power } from 'app/game.enums/powers';
 
-export class Ring extends Item {
+export class Charm extends Item {
 
     powers: Map<Power, number>;
 

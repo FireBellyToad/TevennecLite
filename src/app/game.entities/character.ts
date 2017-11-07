@@ -15,7 +15,7 @@ import { SpellService } from 'app/game.services/spellservice';
 import { Castable } from 'app/game.spells/castable';
 import { Condition } from 'app/game.enums/conditions';
 import { AuraEffect } from 'app/game.enums/auraeffects';
-import { Ring } from 'app/game.items/ring';
+import { Charm } from 'app/game.items/ring';
 import { Mastery } from 'app/game.enums/mastery';
 import { Power } from 'app/game.enums/powers';
 
@@ -23,13 +23,14 @@ export class Character extends GameEntity {
 
     armor: Armor = null;
     shield: Shield = null;
-    leftRing: Ring = null;
-    rightRing: Ring = null;
+    leftRing: Charm = null;
+    rightRing: Charm = null;
+    amulet: Charm = null;
     armorCompetences: ArmorType[] = [];
 
     constructor(name: string, tou: number, agi: number, min: number, wil: number, level: number,
         role: Role, talent: Talent, weapon: Weapon = null, armor: Armor = null,
-        shield: Shield = null, leftRing: Ring = null, rightRing: Ring = null, spells: Castable[] = []) {
+        shield: Shield = null, leftRing: Charm = null, rightRing: Charm = null, amulet: Charm = null, spells: Castable[] = []) {
 
         super(name, tou, agi, min, wil, level, role, talent, spells);
 
@@ -41,6 +42,7 @@ export class Character extends GameEntity {
 
         this.leftRing = leftRing;
         this.rightRing = rightRing;
+        this.amulet = amulet;
 
         this.weapon = weapon;
         this.armor = armor;
@@ -103,6 +105,8 @@ export class Character extends GameEntity {
             touBonus += 1;
         } else if (this.rightRing && this.rightRing.powers.has(Power.OfTheBear)) {
             touBonus += 1;
+        } else if (this.amulet && this.amulet.powers.has(Power.OfTheBear)) {
+            touBonus += 1;
         }
 
         return this.tou + touBonus - this.touPenalty
@@ -118,7 +122,10 @@ export class Character extends GameEntity {
             agiBonus += 1;
         } else if (this.rightRing && this.rightRing.powers.has(Power.OfTheCat)) {
             agiBonus += 1;
+        } else if (this.amulet && this.amulet.powers.has(Power.OfTheCat)) {
+            agiBonus += 1;
         }
+
         return this.agi + agiBonus - this.agiPenalty
     }
     getMin(): number {
@@ -131,6 +138,8 @@ export class Character extends GameEntity {
         if (this.leftRing && this.leftRing.powers.has(Power.OfTheFox)) {
             minBonus += 1;
         } else if (this.rightRing && this.rightRing.powers.has(Power.OfTheFox)) {
+            minBonus += 1;
+        } else if (this.amulet && this.amulet.powers.has(Power.OfTheFox)) {
             minBonus += 1;
         }
 
@@ -146,6 +155,8 @@ export class Character extends GameEntity {
         if (this.leftRing && this.leftRing.powers.has(Power.OfTheEagle)) {
             wilBonus += 1;
         } else if (this.rightRing && this.rightRing.powers.has(Power.OfTheEagle)) {
+            wilBonus += 1;
+        } else if (this.amulet && this.amulet.powers.has(Power.OfTheEagle)) {
             wilBonus += 1;
         }
 
@@ -175,6 +186,8 @@ export class Character extends GameEntity {
             magicBonus += this.leftRing.powers.get(Power.OfPrecision);
         } else if (this.rightRing && this.rightRing.powers.has(Power.OfPrecision)) {
             magicBonus += this.rightRing.powers.get(Power.OfPrecision);
+        } else if (this.amulet && this.amulet.powers.has(Power.OfTheEagle)) {
+            magicBonus += this.amulet.powers.get(Power.OfPrecision);
         }
 
         return competence + Math.floor(this.getAgi() / 2) + magicBonus - this.atkPenalty;
@@ -208,11 +221,6 @@ export class Character extends GameEntity {
             totalModifier += 2;
         }
 
-        // Weapon Magical Damage Bonus
-        if (this.weapon.powers.has(Power.Destructive)) {
-            totalModifier += 2;
-        }
-
         // Check if attack roll was a critical hit
         let isCritical = false;
 
@@ -243,7 +251,12 @@ export class Character extends GameEntity {
 
         // Iracundia Damage Bonus
         if (this.activeAuras.has(AuraEffect.Iracundia)) {
-            totalDices.push({ numberOfDices: 1, dice: 6 })
+            totalDices.push({ numberOfDices: 1, dice: 4 })
+        }
+
+        // Weapon Magical Damage Bonus
+        if (this.weapon.powers.has(Power.Destructive)) {
+            totalDices.push({ numberOfDices: 1, dice: 4 })
         }
 
         // Fighter with improved critical weapon
@@ -272,6 +285,8 @@ export class Character extends GameEntity {
 
     rollInitiative() {
 
+        this.currentInitiative = new StandardDiceRoll(1, 20, this.agi);
+        
         this.currentInitiative.rollDice();
 
         if (this.activeAuras.has(AuraEffect.Celeritas)) {
@@ -306,6 +321,8 @@ export class Character extends GameEntity {
         if (this.leftRing && this.leftRing.powers.has(Power.OfBlessing)) {
             totalModifier += 2;
         } else if (this.rightRing && this.rightRing.powers.has(Power.OfBlessing)) {
+            totalModifier += 2;
+        } else if (this.amulet && this.amulet.powers.has(Power.OfBlessing)) {
             totalModifier += 2;
         }
 
@@ -389,6 +406,8 @@ export class Character extends GameEntity {
         if (this.leftRing && this.leftRing.powers.has(Power.OfMeditation)) {
             toRegain += 1;
         } else if (this.rightRing && this.rightRing.powers.has(Power.OfMeditation)) {
+            toRegain += 1;
+        } else if (this.amulet && this.amulet.powers.has(Power.OfMeditation)) {
             toRegain += 1;
         }
 

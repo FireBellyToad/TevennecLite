@@ -426,6 +426,16 @@ export class BattleService {
                 }
             });
         }
+
+        // Objects
+        if (hitEntry.attacker.weapon.powers.has(Power.OfRetribution)) {
+
+            const cureRoll = new StandardDiceRoll(1, 4);
+
+            hitEntry.attacker.gainHP(cureRoll.totalResult);
+
+            this.logger.addEntry(hitEntry.attacker.name + ' gains ' + cureRoll.toString() + ' Hp');
+        }
     }
 
     // End Round
@@ -492,7 +502,7 @@ export class BattleService {
 
             // If the monster could cast a non-cure spell, he will do, or else he will attack
             let toDo: BattleTurn;
-            const chanceToCast = 1 + ((entity.role === Role.Sorcerer) ? 3 : 2)
+            const chanceToCast = 1 + ((entity.role === Role.Sorcerer) ? 3 : 1)
             entity.spellsKnown.forEach((spell: Castable) => {
                 if ((entity.availableSlots >= spell.slotExpendend) &&
                     (quickSpellMemo !== 'Cure Wounds' && quickSpellMemo !== 'Medico') &&

@@ -12,6 +12,7 @@ export enum Power {
     Infused,
     Efficient,
     OfEfficiency,
+    OfRetribution,
 
     // Armor Powers
     Defensive,

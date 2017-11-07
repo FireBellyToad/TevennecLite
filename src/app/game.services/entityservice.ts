@@ -27,6 +27,21 @@ export class EntitiesService {
         const precise = new Map<Power, number>();
         precise.set(Power.Precise, 1);
 
+        const durendal = new Map<Power, number>();
+        durendal.set(Power.Destructive, 2);
+        durendal.set(Power.OfPrecision, 2);
+        durendal.set(Power.Luminous, 2);
+
+        const lanceOfLonginus = new Map<Power, number>();
+        lanceOfLonginus.set(Power.OfEfficiency, 2);
+        lanceOfLonginus.set(Power.Infused, 2);
+        lanceOfLonginus.set(Power.OfRetribution, 2);
+
+        const armorOfGawain = new Map<Power, number>();
+        armorOfGawain.set(Power.Defensive, 2);
+        armorOfGawain.set(Power.OfTheDivinity, 2);
+        armorOfGawain.set(Power.OfTheFox, 2);
+
         const blessedOfTheBear = new Map<Power, number>();
         blessedOfTheBear.set(Power.OfTheBear, 1);
         blessedOfTheBear.set(Power.Blessed, 2);
@@ -41,7 +56,7 @@ export class EntitiesService {
 
         const shieldPowers = new Map<Power, number>();
         shieldPowers.set(Power.Blocking, 1);
-        // shieldPowers.set(Power.OfFirmness, 0);
+        shieldPowers.set(Power.OfFirmness, 0);
 
         const lumionousOfTheEagle = new Map<Power, number>();
         lumionousOfTheEagle.set(Power.Luminous, 1);
@@ -64,36 +79,41 @@ export class EntitiesService {
             new Character('Tulpin', 1, 5, 1, 0, 10, Role.Fighter, Talent.Duelist,
                 itemService.getMagicWeaponByName('Rapier', lumionousOfTheEagle),
                 itemService.getMagicArmorByName('Chain mail', blessedOfTheBear), null,
-                itemService.getRing(Power.OfTheFox, 1), itemService.getRing(Power.OfBlessing, 2)),
+                itemService.getCharm(Power.OfTheFox, 1), itemService.getCharm(Power.OfBlessing, 2)),
             new Character('Regrell', 3, 2, 4, 0, 10, Role.Fighter, Talent.Mercenary,
                 itemService.getMagicWeaponByName('Great sword', destructiveOfPrecision),
                 itemService.getMagicArmorByName('Full plate', blessedOfTheBear),
-                null, itemService.getRing(Power.OfPrecision, 2), itemService.getRing(Power.OfBlessing, 2),
+                null, itemService.getCharm(Power.OfPrecision, 2), itemService.getCharm(Power.OfBlessing, 2),
+                itemService.getCharm(Power.OfTheDiamond, 2),
                 this.spellService.getCharacterSpells(2)),
-            new Character('Raast', 3, 3, 2, 0, 10, Role.Fighter, Talent.Corrupted,
-                itemService.getMagicWeaponByName('Great sword', destructiveOfPrecision),
-                itemService.getMagicArmorByName('Full plate', blessedOfTheBear),
-                null, itemService.getRing(Power.OfPrecision, 2), itemService.getRing(Power.OfBlessing, 2),
-                this.spellService.getCharacterSpells(1)),
-            new Character('Sir Matheus', 2, 2, 2, 0, 6, Role.Fighter, Talent.Paladin,
-                itemService.getMagicWeaponByName('Long sword', precise),
+            new Character('Raast', 3, 4, 0, 1, 10, Role.Fighter, Talent.Merchant,
+                itemService.getMagicWeaponByName('Pike', lanceOfLonginus),
+                itemService.getMagicArmorByName('Full plate', armorOfGawain),
+                null, itemService.getCharm(Power.OfPrecision, 2), itemService.getCharm(Power.OfBlessing, 2),
+                itemService.getCharm(Power.OfTheBear, 2)),
+            new Character('Sir Matheus', 2, 2, 4, 0, 10, Role.Fighter, Talent.Paladin,
+                itemService.getMagicWeaponByName('Long sword', durendal),
                 itemService.getMagicArmorByName('Splint mail'),
                 itemService.getShield(shieldPowers),
-                null, null, this.spellService.getCharacterSpells(2)),
+                null, null, itemService.getCharm(Power.OfTheBear, 2),
+                this.spellService.getCharacterSpells(3)),
             new Character('Dalvert', 2, 0, 4, 3, 10, Role.Spellcaster, Talent.Templar,
                 itemService.getMagicWeaponByName('Morningstar', destructiveOfPrecision),
                 itemService.getMagicArmorByName('Full plate', blessedOfTheBear), itemService.getShield(shieldPowers),
-                itemService.getRing(Power.OfPrecision, 2), itemService.getRing(Power.OfMeditation, 2),
+                itemService.getCharm(Power.OfPrecision, 2), itemService.getCharm(Power.OfMeditation, 2),
+                itemService.getCharm(Power.OfTheEagle, 2),
                 this.spellService.getCharacterSpells()),
             new Character('Emeric', 0, 0, 5, 4, 10, Role.Spellcaster, Talent.Cleric,
                 itemService.getMagicWeaponByName('Quarterstaff', blockingOfMagic),
                 itemService.getMagicArmorByName('Chain mail', blessedOfTheDivinity), itemService.getShield(shieldPowers),
-                itemService.getRing(Power.OfTheEagle, 2), itemService.getRing(Power.OfMeditation, 2),
+                itemService.getCharm(Power.OfTheEagle, 2), itemService.getCharm(Power.OfMeditation, 2),
+                itemService.getCharm(Power.OfBlessing, 2),
                 this.spellService.getCharacterSpells()),
             new Character('Lissandra', 0, 0, 5, 4, 10, Role.Spellcaster, Talent.Luminous,
                 itemService.getMagicWeaponByName('Mace', ofMagic), itemService.getMagicArmorByName('Chain mail', blessedOfTheBear),
                 itemService.getShield(shieldPowers),
-                itemService.getRing(Power.OfTheEagle, 2), itemService.getRing(Power.OfBlessing, 2),
+                itemService.getCharm(Power.OfTheEagle, 2), itemService.getCharm(Power.OfBlessing, 2),
+                itemService.getCharm(Power.OfMeditation, 2),
                 this.spellService.getCharacterSpells())
         ];
         this.mons = [

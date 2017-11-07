@@ -4,7 +4,7 @@ import { Armor } from 'app/game.items/armor';
 import { ArmorType } from 'app/game.enums/armortypes';
 import { Power } from 'app/game.enums/powers';
 import { Shield } from 'app/game.items/shield';
-import { Ring } from 'app/game.items/ring';
+import { Charm } from 'app/game.items/ring';
 import { Mastery } from 'app/game.enums/mastery';
 import { Injectable } from '@angular/core';
 
@@ -27,6 +27,7 @@ export class ItemService {
             new Weapon('Rapier', 1, 8, [WeaponType.OneHanded, WeaponType.Piercing], [Mastery.Bleed, Mastery.ImprovedBlock]),
             new Weapon('Morningstar', 1, 8, [WeaponType.OneHanded, WeaponType.Bludgeoning], [Mastery.Stun, Mastery.ImprovedStun]),
             new Weapon('Great sword', 1, 12, [WeaponType.TwoHanded, WeaponType.Slashing], [Mastery.Maim, Mastery.Stun]),
+            new Weapon('Pike', 1, 12, [WeaponType.TwoHanded, WeaponType.Piercing], [Mastery.Bleed, Mastery.ImprovedBleed]),
         ];
 
         this.armors = [
@@ -67,10 +68,10 @@ export class ItemService {
         return new Shield(powers);
     }
 
-    getRing(power: Power, value: number) {
+    getCharm(power: Power, value: number) {
 
         const powers = new Map<Power, number>();
         powers.set(power, value);
-        return new Ring(powers);
+        return new Charm(powers);
     }
 }

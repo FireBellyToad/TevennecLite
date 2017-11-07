@@ -43,8 +43,8 @@ export class BattlemoduleComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.char = this.characterService.getCharacterByName('Regrell');
-    this.mons = this.characterService.getMonsterByName('Horla');
+    this.char = this.characterService.getCharacterByName('Lissandra');
+    this.mons = this.characterService.getMonsterByName('Boogeyman');
     this.mons.takeCondition(Condition.Far, 1, true);
   }
 
@@ -67,7 +67,7 @@ export class BattlemoduleComponent implements OnInit {
   }
 
   setMonster() {
-    this.mons.actualHP = this.char.maxHp;
+    this.mons.actualHP = this.mons.maxHp;
     this.mons.conditions.clear();
     this.mons.activeAuras.clear();
     this.mons.occupiedSlots = 0;

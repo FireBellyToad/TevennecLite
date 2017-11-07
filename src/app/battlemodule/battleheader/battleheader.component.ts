@@ -17,7 +17,8 @@ export class BattleheaderComponent implements OnInit {
   @Output() resetMon = new EventEmitter<boolean>();
   spellList: string[];
   characterService: EntitiesService;
-  numberOfResets = 0;
+  numberOfLosses = 0;
+  numberOfWins = 0;
 
   constructor(characterService: EntitiesService) {
     this.characterService = characterService;
@@ -59,11 +60,12 @@ export class BattleheaderComponent implements OnInit {
   }
 
   resetCharacter() {
-    this.numberOfResets++;
+    this.numberOfLosses++;
     this.resetChar.emit(true);
   }
 
   resetMonster() {
+    this.numberOfWins++;
     this.resetMon.emit(true);
   }
 }

@@ -75,7 +75,6 @@ export abstract class GameEntity {
 
         this.role = role;
         this.talent = talent;
-        this.currentInitiative = new StandardDiceRoll(1, 20, this.agi);
 
         for (const spell of spells) {
             this.spellsKnown.set(spell.name, spell);
